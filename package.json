@@ -14,5 +14,8 @@
   },
   "dependencies": {
     "phaser": "^3.0.0"
+  },
+  "scripts": {
+    "dev": "yarn run webpack-dev-server"
   }
 }

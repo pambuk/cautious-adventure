@@ -3,13 +3,19 @@ import 'phaser';
 import {BeachScene} from "./scenes/beach-scene";
 
 const config = {
-    type: Phaser.WEBGL,
-    width: 640,
-    height: 480,
+    type: Phaser.AUTO,
+    width: 400,
+    height: 300,
     scene: BeachScene,
     zoom: 2,
     render: {
-        pixelArt: true,
+        pixelArt: true
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: true
+        }
     }
 };
 

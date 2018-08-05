@@ -4,7 +4,6 @@ export class BeachScene extends Phaser.Scene {
 
     constructor() {
         super();
-        this.playerSpeed = 1;
     }
 
     preload() {
@@ -14,37 +13,27 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.image(320, 240, 'bg');
+        this.visitors = [];
+        this.add.image(80, 90, 'bg');
 
-        this.visitor = this.add.sprite(200, 300, 'visitor-drowning');
-        // this.player = this.add.sprite(400, 400, 'player');
-        this.player = new Player(this, 400, 400, 'player');
+        this.score = 0;
+        this.scoreDisplay = this.add.text(10, 10, this.score, {fontSize: '18px'});
+
+        // visitor
+        this.visitor = this.physics.add.sprite(100, 170, 'visitor-drowning');
+        this.visitor.body.setSize(7, 8);
+
+        // player
+        this.player = new Player(this, 300, 250, 'player');
         this.add.existing(this.player);
 
-        this.textures.generate('sand', { data: ['6'], pixelWidth: 1, pixelHeight: 1 });
-        // this.textures.generate('water', { data: ['1'], pixelWidth: 1, pixelHeight: 1 });
-        this.sandEmitter = this.add.particles('sand').createEmitter({
-            speed: 10,
-            maxParticles: 70,
-            y: 6, x: -1,
-            lifespan: 300
-        });
-        this.sandEmitter.startFollow(this.player);
+        this.physics.add.overlap(this.player, this.visitor, () => {
+            this.score += 10;
+            this.scoreDisplay.setText(this.score);
+            this.visitor.disableBody(true);
+        }, null, this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
-
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNames('player', { start: 0, end: 3 }),
-            frameRate: 10,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'idle',
-            frames: this.anims.generateFrameNames('player', { start: 0 }),
-            frameRate: 0
-        });
 
         this.anims.create({
             key: 'drowning',
@@ -55,41 +44,8 @@ export class BeachScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        // console.log(time, delta);
         this.visitor.play('drowning', true);
-
-        if (this.cursors.left.isDown) {
-            this.player.x -= this.playerSpeed;
-            this.player.flipX = true;
-            this.player.anims.play('walk', true);
-
-        } else if (this.cursors.right.isDown) {
-            this.player.x += this.playerSpeed;
-            this.player.flipX = false;
-            this.player.anims.play('walk', true);
-        }
-
-        if (this.cursors.up.isDown) {
-            this.player.y -= this.playerSpeed;
-            this.player.anims.play('walk', true);
-        } else if (this.cursors.down.isDown) {
-            this.player.y += this.playerSpeed;
-            this.player.anims.play('walk', true);
-        }
-
-        if (!this.cursors.left.isDown && !this.cursors.right.isDown && !this.cursors.up.isDown && !this.cursors.down.isDown) {
-            this.player.anims.play('idle');
-            this.sandEmitter.stop();
-        }
-
-        if (this.cursors.shift.isDown) {
-            // this.playerSpeed = 2.5;
-            this.playerSpeed = 2.5 * ((delta * 30) / 1000);
-            this.sandEmitter.emitParticle();
-        } else {
-            this.playerSpeed = 2 * ((delta * 30) / 1000);
-            // this.playerSpeed = 2;
-        }
-
+        this.player.update(this.cursors, time, delta);
     }
+
 }
