@@ -36,6 +36,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             this.load.image('bg', 'assets/background.png');
             this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
             this.load.spritesheet('visitor-drowning', 'assets/drowning.png', { frameWidth: 16, frameHeight: 16 });
+            this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
         }
     }, {
         key: 'create',
@@ -51,15 +52,16 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             // visitor
             this.visitor = this.physics.add.sprite(100, 170, 'visitor-drowning');
             this.visitor.body.setSize(7, 8);
+            this.visitor.bounty = 10;
 
             // player
             this.player = new _player.Player(this, 300, 250, 'player');
             this.add.existing(this.player);
 
             this.physics.add.overlap(this.player, this.visitor, function () {
-                _this2.score += 10;
+                _this2.score += _this2.visitor.bounty;
                 _this2.scoreDisplay.setText(_this2.score);
-                _this2.visitor.disableBody(true);
+                _this2.visitor.bounty = 0;
             }, null, this);
 
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -115,6 +117,7 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
         _this.body.setSize(5, 5);
         _this.playerSpeed = 2;
         _this.stamina = 10;
+        _this.animationKey = 'walk';
         // this.staminaDisplay =
 
         _this.createEmitters(scene);
@@ -131,6 +134,12 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
             frames: scene.anims.generateFrameNames('player', { start: 0 }),
             frameRate: 0
         });
+
+        scene.anims.create({
+            key: 'swim',
+            frames: scene.anims.generateFrameNames('player-swim', { start: 0, end: 3 }),
+            frameRate: 9
+        });
         return _this;
     }
 
@@ -138,32 +147,45 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
         key: 'update',
         value: function update(keys, time, delta) {
 
+            // @todo would it make more sense to introduce states, like 'in-water', 'on-land'?
+
+            if (this.y < 210) {
+                this.animationKey = 'swim';
+            } else {
+                this.animationKey = 'walk';
+            }
+
             if (keys.left.isDown) {
                 this.x -= this.playerSpeed;
                 this.flipX = true;
-                this.anims.play('walk', true);
+                this.anims.play(this.animationKey, true);
             } else if (keys.right.isDown) {
                 this.x += this.playerSpeed;
                 this.flipX = false;
-                this.anims.play('walk', true);
+                this.anims.play(this.animationKey, true);
             }
 
             if (keys.up.isDown) {
                 this.y -= this.playerSpeed;
-                this.anims.play('walk', true);
+                this.anims.play(this.animationKey, true);
             } else if (keys.down.isDown) {
                 this.y += this.playerSpeed;
-                this.anims.play('walk', true);
+                this.anims.play(this.animationKey, true);
             }
 
             if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
-                this.anims.play('idle');
-                this.sandEmitter.stop();
+                if (this.animationKey === 'walk') {
+                    this.anims.play('idle');
+                    this.sandEmitter.stop();
+                }
             }
 
             if (keys.shift.isDown) {
                 this.playerSpeed = 2.5 * (delta * 30 / 1000);
-                this.sandEmitter.emitParticle();
+
+                if (this.animationKey === 'walk') {
+                    this.sandEmitter.emitParticle();
+                }
             } else {
                 this.playerSpeed = 2 * (delta * 30 / 1000);
             }
@@ -210,7 +232,7 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false
         }
     }
 };

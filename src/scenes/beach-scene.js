@@ -10,6 +10,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.image('bg', 'assets/background.png');
         this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-drowning', 'assets/drowning.png', { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet('player-swim', 'assets/dude-swimming.png', {frameWidth: 16, frameHeight: 16});
     }
 
     create() {
@@ -22,15 +23,16 @@ export class BeachScene extends Phaser.Scene {
         // visitor
         this.visitor = this.physics.add.sprite(100, 170, 'visitor-drowning');
         this.visitor.body.setSize(7, 8);
+        this.visitor.bounty = 10;
 
         // player
         this.player = new Player(this, 300, 250, 'player');
         this.add.existing(this.player);
 
         this.physics.add.overlap(this.player, this.visitor, () => {
-            this.score += 10;
+            this.score += this.visitor.bounty;
             this.scoreDisplay.setText(this.score);
-            this.visitor.disableBody(true);
+            this.visitor.bounty = 0;
         }, null, this);
 
         this.cursors = this.input.keyboard.createCursorKeys();

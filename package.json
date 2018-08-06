@@ -16,6 +16,7 @@
     "phaser": "^3.0.0"
   },
   "scripts": {
-    "dev": "yarn run webpack-dev-server"
+    "dev": "yarn run webpack-dev-server",
+    "build": "./node_modules/webpack/bin/webpack.js"
   }
 }

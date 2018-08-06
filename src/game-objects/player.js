@@ -1,5 +1,4 @@
-export class Player extends Phaser.Physics.Arcade.Sprite
-{
+export class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
@@ -8,6 +7,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite
         this.body.setSize(5, 5);
         this.playerSpeed = 2;
         this.stamina = 10;
+        this.animationKey = 'walk';
         // this.staminaDisplay =
 
         this.createEmitters(scene);
@@ -24,36 +24,56 @@ export class Player extends Phaser.Physics.Arcade.Sprite
             frames: scene.anims.generateFrameNames('player', { start: 0 }),
             frameRate: 0
         });
+
+        scene.anims.create({
+            key: 'swim',
+            frames: scene.anims.generateFrameNames('player-swim', { start: 0, end: 3 }),
+            frameRate: 9
+        });
     }
 
     update(keys, time, delta) {
 
+        // @todo would it make more sense to introduce states, like 'in-water', 'on-land'?
+
+        if (this.y < 210) {
+            this.animationKey = 'swim';
+        } else {
+            this.animationKey = 'walk';
+        }
+
+
         if (keys.left.isDown) {
             this.x -= this.playerSpeed;
             this.flipX = true;
-            this.anims.play('walk', true);
+            this.anims.play(this.animationKey, true);
         } else if (keys.right.isDown) {
             this.x += this.playerSpeed;
             this.flipX = false;
-            this.anims.play('walk', true);
+            this.anims.play(this.animationKey, true);
         }
 
         if (keys.up.isDown) {
             this.y -= this.playerSpeed;
-            this.anims.play('walk', true);
+            this.anims.play(this.animationKey, true);
         } else if (keys.down.isDown) {
             this.y += this.playerSpeed;
-            this.anims.play('walk', true);
+            this.anims.play(this.animationKey, true);
         }
 
         if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
-            this.anims.play('idle');
-            this.sandEmitter.stop();
+            if (this.animationKey === 'walk') {
+                this.anims.play('idle');
+                this.sandEmitter.stop();
+            }
         }
 
         if (keys.shift.isDown) {
             this.playerSpeed = 2.5 * ((delta * 30) / 1000);
-            this.sandEmitter.emitParticle();
+
+            if (this.animationKey === 'walk') {
+                this.sandEmitter.emitParticle();
+            }
         } else {
             this.playerSpeed = 2 * ((delta * 30) / 1000);
         }
