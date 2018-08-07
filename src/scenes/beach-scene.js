@@ -6,7 +6,7 @@ export class BeachScene extends Phaser.Scene {
     preload() {
         this.load.image('bg', 'assets/background.png');
         this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-drowning', 'assets/drowning.png', { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet('visitor-drowning', 'assets/visitor-2-drowning.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
