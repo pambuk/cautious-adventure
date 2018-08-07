@@ -1,5 +1,4 @@
 import 'phaser';
-// import {SimpleScene} from './scenes/simple-scene';
 import {BeachScene} from "./scenes/beach-scene";
 
 const config = {
@@ -14,7 +13,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false 
         }
     }
 };

@@ -1,4 +1,5 @@
-export class Player extends Phaser.Physics.Arcade.Sprite {
+export class Player extends Phaser.Physics.Arcade.Sprite 
+{
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
@@ -28,7 +29,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         scene.anims.create({
             key: 'swim',
             frames: scene.anims.generateFrameNames('player-swim', { start: 0, end: 3 }),
-            frameRate: 9
+            frameRate: 9,
+            repeat: -1
         });
     }
 
@@ -41,7 +43,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         } else {
             this.animationKey = 'walk';
         }
-
 
         if (keys.left.isDown) {
             this.x -= this.playerSpeed;
