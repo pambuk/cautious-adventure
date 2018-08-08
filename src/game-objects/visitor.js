@@ -36,6 +36,9 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                 // console.log('go swimming');
                 this.targetLocation = { x: this.origin.x, y: this.origin.y - this.scene.getRandomIntInclusive(100, 200) };
                 this.play('visitor-walk');
+                if (this.flipX) {
+                    this.flipX = false;
+                }
             }
         }
     }

@@ -11,6 +11,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', {frameHeight: 16, frameWidth: 16});
+        this.load.image('donut', 'assets/donut.png');
     }
 
     create() {
@@ -39,12 +40,14 @@ export class BeachScene extends Phaser.Scene {
         this.add.existing(this.player);
 
         this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
-            // console.log(player, visitor, visitor.bounty);
-
             if (visitor.state === 'drowning') {
                 this.score += visitor.bounty;
                 this.scoreDisplay.setText(this.score);
                 visitor.bounty = 0;
+
+                // ??? why is donut misplaced sometimes? because of flipX === true
+                let donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
+                donut.setZ(-1);
             }
         }, null, this);
 
