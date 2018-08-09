@@ -10,7 +10,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', {frameHeight: 16, frameWidth: 16});
+        this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', { frameHeight: 16, frameWidth: 16 });
         this.load.image('donut', 'assets/donut.png');
     }
 
@@ -21,9 +21,40 @@ export class BeachScene extends Phaser.Scene {
         this.scoreDisplay = this.add.text(10, 10, this.score, { fontSize: '18px' });
 
         this.generateVisitors(3);
+        this.createAnimations();
+
+        // player
+        this.player = new Player(this, 300, 250, 'player');
+        this.add.existing(this.player);
+
+        this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
+            if (visitor.state === 'drowning') {
+                this.score += visitor.bounty;
+                this.scoreDisplay.setText(this.score);
+                visitor.bounty = 0;
+                visitor.z = 1;
+
+                // ??? why is donut misplaced sometimes? because of flipX === true
+                visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
+                if (visitor.state !== 'returning') {
+                    visitor.returnToShore();
+                }
+            }
+        }, null, this);
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+    }
+
+    update(time, delta) {
+        this.player.update(this.cursors, time, delta);
+        this.visitors.runChildUpdate = true;
+    }
+
+    createAnimations() {
         this.anims.create({
             key: 'visitor-walk',
-            frames: this.anims.generateFrameNames('visitor-2-walk', {start: 0, end: 3}),
+            frames: this.anims.generateFrameNames('visitor-2-walk', { start: 0, end: 3 }),
             frameRate: 10,
             repeat: -1
         });
@@ -35,29 +66,15 @@ export class BeachScene extends Phaser.Scene {
             repeat: 1
         });
 
-        // player
-        this.player = new Player(this, 300, 250, 'player');
-        this.add.existing(this.player);
+        this.anims.create({
+            key: 'visitor-1-resting',
+            frames: this.anims.generateFrameNames('visitor-1-resting', {start: 0})
+        });
 
-        this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
-            if (visitor.state === 'drowning') {
-                this.score += visitor.bounty;
-                this.scoreDisplay.setText(this.score);
-                visitor.bounty = 0;
-
-                // ??? why is donut misplaced sometimes? because of flipX === true
-                let donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
-                donut.setZ(-1);
-            }
-        }, null, this);
-
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-    }
-
-    update(time, delta) {
-        this.player.update(this.cursors, time, delta);
-        this.visitors.runChildUpdate = true;
+        this.anims.create({
+            key: 'visitor-2-resting',
+            frames: this.anims.generateFrameNames('visitor-2-resting', {start: 0})
+        });
     }
 
     generateVisitors(count) {

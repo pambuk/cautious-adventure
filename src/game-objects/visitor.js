@@ -10,11 +10,6 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
         this.canMakeDecisions = true;
         this.targetLocation = {};
-
-        if (Object.keys(this.targetLocation).length === 0) {
-            console.log('empty target');
-        }
-
         // this.graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
     }
 
@@ -24,6 +19,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
         if (this.y < 200) {
             this.play('drowning', true);
+        } else if (this.state !== 'resting') {
+            this.play('visitor-walk', true);
+        } else if (this.state === 'resting') {
+            this.play(`visitor-${this.type}-resting`, true);
         }
     }
 
@@ -33,9 +32,9 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
             if (dice >= 0 && dice <= 0.003) {
                 // take a swim
-                // console.log('go swimming');
                 this.targetLocation = { x: this.origin.x, y: this.origin.y - this.scene.getRandomIntInclusive(100, 200) };
                 this.play('visitor-walk');
+                this.state = 'walking';
                 if (this.flipX) {
                     this.flipX = false;
                 }
@@ -47,15 +46,27 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         if (Object.keys(this.targetLocation).length > 0) {
             this.goTo(this.targetLocation);
 
-            // let line = new Phaser.Geom.Line(this.x, this.y, this.targetLocation.x, this.targetLocation.y);
-            // this.graphics.strokeLineShape(line);
-
-            if (this.getBounds().contains(this.targetLocation.x, this.targetLocation.y)) {
+            if (this.state === 'walking' && this.arrived(this.targetLocation)) {
                 this.targetLocation = {};
                 this.canMakeDecisions = false;
                 this.state = 'drowning';
             }
+
+            if (this.state === 'returning' && this.arrived(this.targetLocation)) {
+                this.donut.destroy();
+                this.state = 'resting';
+                this.targetLocation = {};
+                this.play(`visitor-2-resting`, true);
+            }
+
+            if (this.state === 'returning' && this.donut) {
+                this.donut.y = this.y;
+            }
         }
+    }
+
+    arrived(target) {
+        return this.getBounds().contains(target.x, target.y);
     }
 
     goTo(target) {
@@ -71,5 +82,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         // move towards target
         this.x += toPointX * 1;
         this.y += toPointY * 1;
+    }
+
+    returnToShore() {
+        this.state = 'returning';
+        this.targetLocation = this.origin;
     }
 }
