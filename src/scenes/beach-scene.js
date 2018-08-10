@@ -12,6 +12,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', { frameHeight: 16, frameWidth: 16 });
         this.load.image('donut', 'assets/donut.png');
+        this.load.image('blanket', 'assets/blanket-green.png');
     }
 
     create() {

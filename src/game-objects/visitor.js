@@ -7,10 +7,12 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.state = 'resting';
         this.bounty = 10;
         this.origin = { x, y };
+        this.z = 1;
 
         this.canMakeDecisions = true;
         this.targetLocation = {};
         // this.graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
+        this.blanket = scene.add.image(this.x, this.y, 'blanket');
     }
 
     update(time, delta) {
@@ -86,6 +88,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
     returnToShore() {
         this.state = 'returning';
-        this.targetLocation = this.origin;
+        // this.targetLocation = this.origin;
+        this.targetLocation = {x: this.blanket.x, y: this.blanket.y + 8};
     }
 }
