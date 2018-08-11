@@ -8,6 +8,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.bounty = 10;
         this.origin = { x, y };
         this.z = 1;
+        this.chanceToDrown = 0.003;
 
         this.canMakeDecisions = true;
         this.targetLocation = {};
@@ -23,6 +24,9 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
             this.play('drowning', true);
         } else if (this.state !== 'resting') {
             this.play('visitor-walk', true);
+            if (this.donut) {
+                this.donut.destroy();
+            }
         } else if (this.state === 'resting') {
             this.play(`visitor-${this.type}-resting`, true);
         }
@@ -32,7 +36,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         if (Object.keys(this.targetLocation).length === 0 && this.canMakeDecisions) {
             let dice = Math.random();
 
-            if (dice >= 0 && dice <= 0.003) {
+            if (dice >= 0 && dice <= this.chanceToDrown) {
                 // take a swim
                 this.targetLocation = { x: this.origin.x, y: this.origin.y - this.scene.getRandomIntInclusive(100, 200) };
                 this.play('visitor-walk');
@@ -58,6 +62,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                 this.donut.destroy();
                 this.state = 'resting';
                 this.targetLocation = {};
+
+                this.canMakeDecisions = true;
+                this.bounty = 10;
+
                 this.play(`visitor-2-resting`, true);
             }
 
@@ -89,6 +97,6 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
     returnToShore() {
         this.state = 'returning';
         // this.targetLocation = this.origin;
-        this.targetLocation = {x: this.blanket.x, y: this.blanket.y + 8};
+        this.targetLocation = { x: this.blanket.x, y: this.blanket.y + 8 };
     }
 }

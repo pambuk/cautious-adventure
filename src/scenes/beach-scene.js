@@ -16,17 +16,18 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create() {
-        this.visitors = this.physics.add.group();
         this.add.image(80, 90, 'bg');
+        this.visitors = this.physics.add.group();
+        
+        // player
+        this.player = new Player(this, 300, 250, 'player');
+        this.add.existing(this.player);
+
         this.score = 0;
         this.scoreDisplay = this.add.text(10, 10, this.score, { fontSize: '18px' });
 
         this.generateVisitors(3);
         this.createAnimations();
-
-        // player
-        this.player = new Player(this, 300, 250, 'player');
-        this.add.existing(this.player);
 
         this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
             if (visitor.state === 'drowning') {
@@ -44,7 +45,6 @@ export class BeachScene extends Phaser.Scene {
         }, null, this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
-
     }
 
     update(time, delta) {
