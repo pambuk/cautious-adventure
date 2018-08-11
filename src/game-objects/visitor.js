@@ -63,8 +63,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                 this.state = 'resting';
                 this.targetLocation = {};
 
+                // visitor can go swimming again
                 this.canMakeDecisions = true;
                 this.bounty = 10;
+                this.chanceToDrown -= 0.001;
 
                 this.play(`visitor-2-resting`, true);
             }

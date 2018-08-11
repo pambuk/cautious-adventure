@@ -18,6 +18,7 @@ export class BeachScene extends Phaser.Scene {
     create() {
         this.add.image(80, 90, 'bg');
         this.visitors = this.physics.add.group();
+        this.generateVisitors(3);
         
         // player
         this.player = new Player(this, 300, 250, 'player');
@@ -26,7 +27,6 @@ export class BeachScene extends Phaser.Scene {
         this.score = 0;
         this.scoreDisplay = this.add.text(10, 10, this.score, { fontSize: '18px' });
 
-        this.generateVisitors(3);
         this.createAnimations();
 
         this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
