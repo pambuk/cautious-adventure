@@ -11,6 +11,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', { frameHeight: 16, frameWidth: 16 });
+        this.load.spritesheet('visitor-2-drowning-2', 'assets/visitor-2-drowning-2.png', {frameHeight: 16, frameWidth: 16});
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
     }
@@ -45,6 +46,9 @@ export class BeachScene extends Phaser.Scene {
         }, null, this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        // this.cameras.main.setSize(50, 50);
+        // this.cameras.main.startFollow(this.player);
     }
 
     update(time, delta) {
@@ -75,6 +79,11 @@ export class BeachScene extends Phaser.Scene {
         this.anims.create({
             key: 'visitor-2-resting',
             frames: this.anims.generateFrameNames('visitor-2-resting', {start: 0})
+        });
+
+        this.anims.create({
+            key: 'visitor-2-drowning-2',
+            frames: this.anims.generateFrameNames('visitor-2-drowning-2', {start: 0, end: 5})
         });
     }
 
