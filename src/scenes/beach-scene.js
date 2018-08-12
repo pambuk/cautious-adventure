@@ -80,9 +80,9 @@ export class BeachScene extends Phaser.Scene {
 
     generateVisitors(count) {
         for (let i = 0; i < count; i++) {
-            let x = this.getRandomIntInclusive(20, 380);
-            let y = this.getRandomIntInclusive(230, 280);
-            let visitorType = this.getRandomIntInclusive(1, 2);
+            let x = Phaser.Math.Between(20, 380);
+            let y = Phaser.Math.Between(230, 280);
+            let visitorType = Phaser.Math.Between(1, 2);
             let visitor = new Visitor(this, x, y, `visitor-${visitorType}-resting`);
             visitor.type = visitorType;
 
@@ -93,11 +93,5 @@ export class BeachScene extends Phaser.Scene {
             this.visitors.add(visitor);
             this.add.existing(visitor);
         }
-    }
-
-    getRandomIntInclusive(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }

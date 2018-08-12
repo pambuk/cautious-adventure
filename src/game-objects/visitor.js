@@ -38,7 +38,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
             if (dice >= 0 && dice <= this.chanceToDrown) {
                 // take a swim
-                this.targetLocation = { x: this.origin.x, y: this.origin.y - this.scene.getRandomIntInclusive(100, 200) };
+                this.targetLocation = {
+                    x: this.origin.x + Phaser.Math.Between(-30, 30), 
+                    y: this.origin.y - Phaser.Math.Between(100, 200)
+                };
                 this.play('visitor-walk');
                 this.state = 'walking';
                 if (this.flipX) {
@@ -73,6 +76,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
             if (this.state === 'returning' && this.donut) {
                 this.donut.y = this.y;
+                this.donut.x = this.x;
             }
         }
     }
