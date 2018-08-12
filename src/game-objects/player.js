@@ -1,5 +1,4 @@
-export class Player extends Phaser.Physics.Arcade.Sprite 
-{
+export class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
 
@@ -9,9 +8,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite
         this.playerSpeed = 2;
         this.stamina = 10;
         this.animationKey = 'walk';
-        // this.staminaDisplay =
+        this.staminaDisplay = scene.add.text(40, 10, this.getStaminaForDisplay(this.stamina), { fontSize: '10px' });
 
         this.createEmitters(scene);
+
+        scene.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                if (this.keys.shift.isDown && this.stamina > 0) {
+                    this.setStamina(this.stamina - 1);
+                } else if (!this.keys.shift.isDown && this.stamina < 10) {
+                    this.setStamina(this.stamina + 1);
+                }
+            },
+            repeat: -1
+        });
 
         scene.anims.create({
             key: 'walk',
@@ -35,6 +46,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite
     }
 
     update(keys, time, delta) {
+        this.keys = keys;
 
         // @todo would it make more sense to introduce states, like 'in-water', 'on-land'?
 
@@ -69,7 +81,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite
             }
         }
 
-        if (keys.shift.isDown) {
+        if (keys.shift.isDown && this.stamina > 0) {
             this.playerSpeed = 2.5 * ((delta * 30) / 1000);
 
             if (this.animationKey === 'walk') {
@@ -90,5 +102,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite
         });
 
         this.sandEmitter.startFollow(this);
+    }
+
+    getStaminaForDisplay(stamina) {
+        return '.'.repeat(stamina);
+    }
+
+    setStamina(current) {
+        this.stamina = current;
+        this.staminaDisplay.setText(this.getStaminaForDisplay(this.stamina));
     }
 }
