@@ -11,6 +11,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', { frameHeight: 16, frameWidth: 16 });
+        this.load.spritesheet('visitor-2-drowning-2', 'assets/visitor-2-drowning-2.png', {frameHeight: 16, frameWidth: 16});
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
     }
@@ -45,6 +46,9 @@ export class BeachScene extends Phaser.Scene {
         }, null, this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        // this.cameras.main.setSize(50, 50);
+        // this.cameras.main.startFollow(this.player);
     }
 
     update(time, delta) {
@@ -76,13 +80,18 @@ export class BeachScene extends Phaser.Scene {
             key: 'visitor-2-resting',
             frames: this.anims.generateFrameNames('visitor-2-resting', {start: 0})
         });
+
+        this.anims.create({
+            key: 'visitor-2-drowning-2',
+            frames: this.anims.generateFrameNames('visitor-2-drowning-2', {start: 0, end: 5})
+        });
     }
 
     generateVisitors(count) {
         for (let i = 0; i < count; i++) {
-            let x = this.getRandomIntInclusive(20, 380);
-            let y = this.getRandomIntInclusive(230, 280);
-            let visitorType = this.getRandomIntInclusive(1, 2);
+            let x = Phaser.Math.Between(20, 380);
+            let y = Phaser.Math.Between(230, 280);
+            let visitorType = Phaser.Math.Between(1, 2);
             let visitor = new Visitor(this, x, y, `visitor-${visitorType}-resting`);
             visitor.type = visitorType;
 
@@ -93,11 +102,5 @@ export class BeachScene extends Phaser.Scene {
             this.visitors.add(visitor);
             this.add.existing(visitor);
         }
-    }
-
-    getRandomIntInclusive(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }

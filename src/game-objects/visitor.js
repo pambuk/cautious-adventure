@@ -14,6 +14,35 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.targetLocation = {};
         // this.graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
         this.blanket = scene.add.image(this.x, this.y, 'blanket');
+
+        this.maxHealth = 5;
+        this.health = this.maxHealth;
+        this.healthDisplay = this.scene.add.text(-100, -100, '.'.repeat(Math.floor(this.health)));
+
+        let timer = scene.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                if (this.state === 'drowning' && this.health > 0) {
+                    this.health -= .5;
+
+                    this.healthDisplay.setText('.'.repeat(Math.floor(this.health)));
+                }
+
+                if (this.health === 0) {
+                    if (scene.score > 15) {
+                        scene.score = scene.score - 15;
+                    } else {
+                        scene.score = 0;
+                    }
+
+                    scene.scoreDisplay.setText(scene.score);
+
+                    this.destroy();
+                    timer.destroy();
+                }
+            },
+            repeat: -1
+        });
     }
 
     update(time, delta) {
@@ -21,7 +50,11 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.actOnDecision();
 
         if (this.y < 200) {
-            this.play('drowning', true);
+            if (this.state === 'drowning') {
+                this.play('visitor-2-drowning-2', true);
+            } else {
+                this.play('drowning', true);
+            }
         } else if (this.state !== 'resting') {
             this.play('visitor-walk', true);
             if (this.donut) {
@@ -38,7 +71,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
             if (dice >= 0 && dice <= this.chanceToDrown) {
                 // take a swim
-                this.targetLocation = { x: this.origin.x, y: this.origin.y - this.scene.getRandomIntInclusive(100, 200) };
+                this.targetLocation = {
+                    x: this.origin.x + Phaser.Math.Between(-30, 30),
+                    y: this.origin.y - Phaser.Math.Between(100, 200)
+                };
                 this.play('visitor-walk');
                 this.state = 'walking';
                 if (this.flipX) {
@@ -56,6 +92,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                 this.targetLocation = {};
                 this.canMakeDecisions = false;
                 this.state = 'drowning';
+
+                this.healthDisplay.visible = true;
+                this.healthDisplay.x = this.x;
+                this.healthDisplay.y = this.y;
             }
 
             if (this.state === 'returning' && this.arrived(this.targetLocation)) {
@@ -69,10 +109,20 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                 this.chanceToDrown -= 0.001;
 
                 this.play(`visitor-2-resting`, true);
+
+                if (Math.random() > .5) {
+                    this.flipX = true;
+                }
+
+                this.health = this.maxHealth;
+                this.healthDisplay.setText('.'.repeat(Math.floor(this.health)));
             }
 
             if (this.state === 'returning' && this.donut) {
                 this.donut.y = this.y;
+                this.donut.x = this.x;
+
+                this.healthDisplay.visible = false;
             }
         }
     }
