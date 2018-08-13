@@ -83,7 +83,8 @@ export class BeachScene extends Phaser.Scene {
 
         this.anims.create({
             key: 'visitor-2-drowning-2',
-            frames: this.anims.generateFrameNames('visitor-2-drowning-2', {start: 0, end: 5})
+            frames: this.anims.generateFrameNames('visitor-2-drowning-2', {start: 0, end: 5}),
+            frameRate: 6
         });
     }
 
