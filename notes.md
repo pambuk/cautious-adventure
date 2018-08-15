@@ -6,3 +6,6 @@ https://photonstorm.github.io/phaser3-docs
 
 javascript state machine
 https://github.com/jakesgordon/javascript-state-machine
+
+game mechanics
+https://gamemechanicexplorer.com/
