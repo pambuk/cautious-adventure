@@ -21,10 +21,11 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create() {
+        this.deaths = 0;
+
         this.add.image(80, 90, 'bg');
         this.visitors = this.physics.add.group();
-        this.generateVisitors(3);
-
+        this.generateVisitors(10);
 
         // player
         this.player = new Player(this, 300, 250, 'player');
@@ -32,6 +33,10 @@ export class BeachScene extends Phaser.Scene {
 
         this.score = 0;
         this.scoreDisplay = this.add.text(10, 10, this.score, { fontSize: '18px' });
+
+        this.deathsDisplay = this.add.text(120, 10, this.deaths, {fontSize: '18px'});
+        this.gameOverDisplay = this.add.text(150, 100, 'GAME OVER', {fontSize: '24px'});
+        this.gameOverDisplay.visible = false;
 
         this.createAnimations();
 
@@ -84,11 +89,19 @@ export class BeachScene extends Phaser.Scene {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
         this.sendCornCart();
+        this.gameOver();
 
         // this.waves.forEach(rect => {
         // rect.x++; rect.y++;
         // this.graphics.strokeRectShape(rect);
         // });
+    }
+
+    gameOver() {
+        if (this.deaths >= 5) {
+            this.scene.manager.pause('default');
+            this.gameOverDisplay.visible = true;
+        }
     }
 
     sendCornCart() {
@@ -102,7 +115,6 @@ export class BeachScene extends Phaser.Scene {
         if (Math.floor(this.cornCart.x) <= 0) {
             this.cornCart.setVelocity(0, 0);
             this.cornCart.x = 500;
-
             this.time.addEvent({
                 delay: Phaser.Math.Between(15000, 30000),
                 callback: () => this.cornCartRunning = false
