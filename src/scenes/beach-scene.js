@@ -53,11 +53,20 @@ export class BeachScene extends Phaser.Scene {
             }
         }, null, this);
 
+        this.physics.add.overlap(this.player, this.cornCart, () => {
+            this.player.stamina += 5;
+            if (this.player.stamina > 10) {
+                this.player.stamina = 10;
+            }
+
+            this.player.staminaDisplay.setText(this.player.getStaminaForDisplay(this.player.stamina));
+        });
+
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // this.cameras.main.setSize(50, 50);
         // this.cameras.main.startFollow(this.player);
-        this.graphics = this.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
+        // this.graphics = this.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
         // this.waves = this.waves();
 
         // console.log(this.textures);
@@ -88,6 +97,16 @@ export class BeachScene extends Phaser.Scene {
 
             this.cornCart.play('corn-cart-rides');
             this.physics.moveTo(this.cornCart, 0, 290, 40);
+        }
+
+        if (Math.floor(this.cornCart.x) <= 0) {
+            this.cornCart.setVelocity(0, 0);
+            this.cornCart.x = 500;
+
+            this.time.addEvent({
+                delay: Phaser.Math.Between(15000, 30000),
+                callback: () => this.cornCartRunning = false
+            });
         }
     }
 
