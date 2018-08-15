@@ -32,7 +32,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
         // @todo would it make more sense to introduce states, like 'in-water', 'on-land'?
 
-        if (this.y < 210 + this.cameraScroll) {
+        if (this.y < 195 + this.cameraScroll) {
             this.animationKey = 'swim';
         } else {
             this.animationKey = 'walk';

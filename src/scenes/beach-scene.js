@@ -54,8 +54,6 @@ export class BeachScene extends Phaser.Scene {
                 this.scoreDisplay.setText(this.score);
                 visitor.bounty = 0;
                 visitor.z = 1;
-
-                // ??? why is donut misplaced sometimes? because of flipX === true
                 visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
                 if (visitor.state !== 'returning') {
                     visitor.returnToShore();
@@ -74,20 +72,9 @@ export class BeachScene extends Phaser.Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        // this.cameras.main.setSize(50, 50);
-        // this.cameras.main.startFollow(this.player);
-        // this.graphics = this.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
-        // this.waves = this.waves();
-
-        // console.log(this.textures);
-        // this.time.addEvent({
-        //     delay: 1000,
-        //     callback: () => {
-        //         console.log('draw waves');
-        //         this.waves();
-        //     },
-        //     // repeat: -1
-        // });
+        this.scoreDisplay.visible = false;
+        this.deathsDisplay.visible = false;
+        this.player.staminaDisplay.visible = false;
     }
 
     update(time, delta) {
@@ -100,11 +87,6 @@ export class BeachScene extends Phaser.Scene {
         // rect.x++; rect.y++;
         // this.graphics.strokeRectShape(rect);
         // });
-
-        // move beach into camera viewport, start the game
-        // if (this.bg.y !== -250) {
-            // this.bg.setY(--this.bg.y);
-        // } else {
         if (this.cameras.main.scrollY !== 250) {
             this.cameras.main.scrollY += 1;
         } else {
@@ -116,6 +98,9 @@ export class BeachScene extends Phaser.Scene {
                 this.gameStarted = true;
                 this.physics.world.setBounds(0, 250, 400, 300);
                 this.player.setCollideWorldBounds(true);
+                this.scoreDisplay.visible = true;
+                this.deathsDisplay.visible = true;
+                this.player.staminaDisplay.visible = true;
             }
         }
     }
