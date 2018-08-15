@@ -43,7 +43,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.pickTarget();
         this.actOnDecision();
 
-        if (this.y < 200 + this.cameraScroll) {
+        if (this.y < 195 + this.cameraScroll) {
             if (this.state === 'drowning') {
                 this.play('visitor-2-drowning-2', true);
             } else {
