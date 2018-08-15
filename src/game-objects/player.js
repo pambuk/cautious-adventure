@@ -32,9 +32,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         });
 
         scene.anims.create({
-            key: 'idle',
-            frames: scene.anims.generateFrameNames('player', { start: 0 }),
-            frameRate: 0
+            key: 'player-idle',
+            frames: scene.anims.generateFrameNames('player-idle', { start: 0, end: 5 }),
+            frameRate: 2,
+            repeat: -1
         });
 
         scene.anims.create({
@@ -76,7 +77,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
         if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
             if (this.animationKey === 'walk') {
-                this.anims.play('idle');
+                this.anims.play('player-idle', true);
                 this.sandEmitter.stop();
             }
         }
