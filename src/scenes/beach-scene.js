@@ -19,9 +19,14 @@ export class BeachScene extends Phaser.Scene {
 
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
+
+        this.load.audio('waves', ['assets/ocean-waves.wav']);
     }
 
     create() {
+        let audio = this.sound.add('waves');
+        audio.play({loop: true});
+
         this.cameraScroll = 250;
         this.gameStarted = false;
         this.deaths = 0;

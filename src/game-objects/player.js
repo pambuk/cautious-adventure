@@ -4,7 +4,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
         this.cameraScroll = scene.cameraScroll;
         scene.physics.add.existing(this);
-        // this.setCollideWorldBounds(true);
         this.body.setSize(5, 5);
         this.playerSpeed = 2;
         this.stamina = 10;
