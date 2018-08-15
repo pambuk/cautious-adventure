@@ -5,7 +5,8 @@ import { Physics } from 'phaser';
 export class BeachScene extends Phaser.Scene {
 
     preload() {
-        this.load.image('bg', 'assets/background.png');
+        this.load.image('bg', 'assets/background2.png');
+        // this.load.image('bg', 'assets/background.png');
         this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-drowning', 'assets/visitor-2-drowning.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
@@ -21,26 +22,30 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create() {
+        this.cameraScroll = 250;
+        this.gameStarted = false;
         this.deaths = 0;
 
-        this.add.image(80, 90, 'bg');
+        this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
         this.generateVisitors(10);
 
         // player
-        this.player = new Player(this, 300, 250, 'player');
+        this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
         this.add.existing(this.player);
 
         this.score = 0;
-        this.scoreDisplay = this.add.text(10, 10, this.score, { fontSize: '18px' });
+        this.scoreDisplay = this.add.text(10, 10 + this.cameraScroll, this.score, { fontSize: '18px' });
 
-        this.deathsDisplay = this.add.text(120, 10, this.deaths, {fontSize: '18px'});
-        this.gameOverDisplay = this.add.text(150, 100, 'GAME OVER', {fontSize: '24px'});
+        this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
+        this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
+
+        this.add.text(180, 150, "Day 1", {fontSize: '24px'});
 
         this.createAnimations();
 
-        this.cornCart = this.physics.add.sprite(500, 290, 'corn-cart');
+        this.cornCart = this.physics.add.sprite(500, 290 + this.cameraScroll, 'corn-cart');
         this.cornCartRunning = false;
 
         this.physics.add.overlap(this.player, this.visitors, (player, visitor) => {
@@ -95,6 +100,24 @@ export class BeachScene extends Phaser.Scene {
         // rect.x++; rect.y++;
         // this.graphics.strokeRectShape(rect);
         // });
+
+        // move beach into camera viewport, start the game
+        // if (this.bg.y !== -250) {
+            // this.bg.setY(--this.bg.y);
+        // } else {
+        if (this.cameras.main.scrollY !== 250) {
+            this.cameras.main.scrollY += 1;
+        } else {
+            if (this.gameStarted === false) {
+                this.visitors.getChildren().forEach(visitor => {
+                    visitor.canMakeDecisions = true;
+                });
+
+                this.gameStarted = true;
+                this.physics.world.setBounds(0, 250, 400, 300);
+                this.player.setCollideWorldBounds(true);
+            }
+        }
     }
 
     gameOver() {
@@ -109,7 +132,7 @@ export class BeachScene extends Phaser.Scene {
             this.cornCartRunning = true;
 
             this.cornCart.play('corn-cart-rides');
-            this.physics.moveTo(this.cornCart, 0, 290, 40);
+            this.physics.moveTo(this.cornCart, 0, 290 + this.cameraScroll, 40);
         }
 
         if (Math.floor(this.cornCart.x) <= 0) {
@@ -195,7 +218,7 @@ export class BeachScene extends Phaser.Scene {
             let x = Phaser.Math.Between(20, 380);
             let y = Phaser.Math.Between(230, 280);
             let visitorType = Phaser.Math.Between(1, 2);
-            let visitor = new Visitor(this, x, y, `visitor-${visitorType}-resting`);
+            let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
             visitor.type = visitorType;
 
             if (Math.random() >= 0.5) {

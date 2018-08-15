@@ -2,6 +2,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture);
         scene.physics.add.existing(this);
+        this.cameraScroll = scene.cameraScroll;
 
         // states: resting, walking, swimming, drowning, returning
         this.state = 'resting';
@@ -10,7 +11,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.z = 1;
         this.chanceToDrown = 0.003;
 
-        this.canMakeDecisions = true;
+        this.canMakeDecisions = false;
         this.targetLocation = {};
         // this.graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
         this.blanket = scene.add.image(this.x, this.y, 'blanket');
@@ -24,19 +25,10 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
             callback: () => {
                 if (this.state === 'drowning' && this.health > 0) {
                     this.health -= .5;
-
                     this.healthDisplay.setText('.'.repeat(Math.floor(this.health)));
                 }
 
                 if (this.health === 0) {
-                    if (scene.score > 15) {
-                        scene.score = scene.score - 15;
-                    } else {
-                        scene.score = 0;
-                    }
-
-                    scene.scoreDisplay.setText(scene.score);
-
                     this.destroy();
                     timer.destroy();
                     scene.deaths++;
@@ -51,7 +43,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.pickTarget();
         this.actOnDecision();
 
-        if (this.y < 200) {
+        if (this.y < 200 + this.cameraScroll) {
             if (this.state === 'drowning') {
                 this.play('visitor-2-drowning-2', true);
             } else {
