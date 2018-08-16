@@ -36,7 +36,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
                     if (scene.deaths > scene.maxDeaths) {
                         scene.deaths = scene.maxDeaths;
                     }
-                    
+
                     scene.deathsDisplay.setText(scene.deaths);
                 }
             },
