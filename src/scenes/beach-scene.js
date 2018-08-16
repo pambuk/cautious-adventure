@@ -32,6 +32,7 @@ export class BeachScene extends Phaser.Scene {
         this.cameraScroll = 250;
         this.gameStarted = false;
         this.deaths = 0;
+        this.maxDeaths = 5;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
@@ -190,36 +191,6 @@ export class BeachScene extends Phaser.Scene {
             frames: this.anims.generateFrameNames('corn-cart', { start: 0, end: 2 }),
             repeat: -1
         });
-    }
-
-    waves() {
-        let waves = [];
-        let x = 1 / this.cameras.main.width;
-        let points = {
-            x: [0, 50, 100, 150, 200, 250, 300, 350, 400],
-            y: [
-                Phaser.Math.Between(180, 220),
-                Phaser.Math.Between(200, 220),
-                Phaser.Math.Between(180, 220),
-                Phaser.Math.Between(200, 220),
-                Phaser.Math.Between(180, 220),
-                Phaser.Math.Between(200, 230),
-                Phaser.Math.Between(180, 220),
-                Phaser.Math.Between(200, 230),
-                Phaser.Math.Between(180, 220),
-            ]
-        };
-
-        for (let i = 0; i <= 1; i += x) {
-            let px = Phaser.Math.Interpolation.Bezier(points.x, i);
-            let py = Phaser.Math.Interpolation.Bezier(points.y, i);
-
-            let r = new Phaser.Geom.Rectangle(px, py, 1, 1);
-            this.graphics.strokeRectShape(r);
-            waves.push(r);
-        }
-
-        return waves;
     }
 
     generateVisitors(count) {
