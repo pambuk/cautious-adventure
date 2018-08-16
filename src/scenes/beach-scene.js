@@ -24,8 +24,10 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create() {
+        this.runIntro = false;
+
         let audio = this.sound.add('waves');
-        audio.play({loop: true});
+        audio.play({ loop: true });
 
         this.cameraScroll = 250;
         this.gameStarted = false;
@@ -46,7 +48,22 @@ export class BeachScene extends Phaser.Scene {
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
-        this.add.text(180, 150, "Day 1", {fontSize: '24px'});
+        this.introTextDisplay = this.add.text(180, 100, "Day 1", { fontSize: '24px' });
+        this.introTextDisplay.alpha = 0;
+
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                this.tweens.add({
+                    targets: this.introTextDisplay,
+                    alpha: 1,
+                    duration: 2000,
+                    onComplete: () => {
+                        this.runIntro = true;
+                    }
+                })
+            }
+        });
 
         this.createAnimations();
 
@@ -88,10 +105,12 @@ export class BeachScene extends Phaser.Scene {
         this.sendCornCart();
         this.gameOver();
 
-        // this.waves.forEach(rect => {
-        // rect.x++; rect.y++;
-        // this.graphics.strokeRectShape(rect);
-        // });
+        if (this.runIntro === true) {
+            this.scrollCamera();
+        }
+    }
+
+    scrollCamera() {
         if (this.cameras.main.scrollY !== 250) {
             this.cameras.main.scrollY += 1;
         } else {

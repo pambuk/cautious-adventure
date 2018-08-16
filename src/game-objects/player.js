@@ -19,7 +19,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                 if (this.keys.shift.isDown && this.stamina > 0) {
                     this.setStamina(this.stamina - 1);
                 } else if (!this.keys.shift.isDown && this.stamina < 10) {
-                    this.setStamina(this.stamina + 1);
+                    this.setStamina(this.stamina + .5);
                 }
             },
             repeat: -1
