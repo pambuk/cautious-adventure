@@ -33,6 +33,7 @@ export class BeachScene extends Phaser.Scene {
         this.gameStarted = false;
         this.deaths = 0;
         this.maxDeaths = 5;
+        this.dayEndsAt = 16;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
@@ -45,7 +46,13 @@ export class BeachScene extends Phaser.Scene {
         this.score = 0;
         this.scoreDisplay = this.add.text(10, 10 + this.cameraScroll, this.score, { fontSize: '18px' });
 
+        this.dayTimer = 3600 * 8;
+
+        this.dayTimerDisplay = this.add.text(350, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), {fontSize: '18px'});
+        this.dayTimerDisplay.visible = false;
+
         this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
+        
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
@@ -64,6 +71,25 @@ export class BeachScene extends Phaser.Scene {
                     }
                 })
             }
+        });
+
+        let clockTimer = this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                if (this.gameStarted === true) {
+                    this.dayTimer += 300;
+                    this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
+
+                    // this.dayEndsAt = 9;
+                    if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
+                        console.log('day ends');
+
+                        clockTimer.destroy();
+                        this.nextLevel();
+                    }
+                }
+            },
+            repeat: -1
         });
 
         this.createAnimations();
@@ -123,9 +149,11 @@ export class BeachScene extends Phaser.Scene {
                 this.gameStarted = true;
                 this.physics.world.setBounds(0, 250, 400, 300);
                 this.player.setCollideWorldBounds(true);
+
                 this.scoreDisplay.visible = true;
                 this.deathsDisplay.visible = true;
                 this.player.staminaDisplay.visible = true;
+                this.dayTimerDisplay.visible = true;
             }
         }
     }
@@ -208,5 +236,18 @@ export class BeachScene extends Phaser.Scene {
             this.visitors.add(visitor);
             this.add.existing(visitor);
         }
+    }
+
+    getTimerDisplay(seconds) {
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor(seconds % 3600 / 60).toString();
+
+        minutes = minutes.padStart(2, '0');
+
+        return `${hours}:${minutes}`;
+    }
+
+    nextLevel() {
+        this.scene.manager.pause('default');
     }
 }

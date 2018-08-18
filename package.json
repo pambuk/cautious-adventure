@@ -13,10 +13,10 @@
     "copy-webpack-plugin": "^4.5.2",
     "html-webpack-plugin": "^3.2.0",
     "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.0.0"
+    "webpack-dev-server": "^2.0.0",
+    "babel-preset-es2015": "^6.24.1"
   },
   "dependencies": {
-    "babel-preset-es2015": "^6.24.1",
     "phaser": "^3.0.0",
     "webfontloader": "^1.6.28"
   },
