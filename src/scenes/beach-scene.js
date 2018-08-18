@@ -34,6 +34,7 @@ export class BeachScene extends Phaser.Scene {
         this.deaths = 0;
         this.maxDeaths = 5;
         this.dayEndsAt = 16;
+        this.dayNumber = 1;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
@@ -48,7 +49,7 @@ export class BeachScene extends Phaser.Scene {
 
         this.dayTimer = 3600 * 8;
 
-        this.dayTimerDisplay = this.add.text(350, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), {fontSize: '18px'});
+        this.dayTimerDisplay = this.add.text(340, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), {fontSize: '18px'});
         this.dayTimerDisplay.visible = false;
 
         this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
@@ -56,22 +57,10 @@ export class BeachScene extends Phaser.Scene {
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
-        this.introTextDisplay = this.add.text(180, 100, "Day 1", { fontSize: '24px' });
+        this.introTextDisplay = this.add.text(180, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
         this.introTextDisplay.alpha = 0;
 
-        this.time.addEvent({
-            delay: 1000,
-            callback: () => {
-                this.tweens.add({
-                    targets: this.introTextDisplay,
-                    alpha: 1,
-                    duration: 2000,
-                    onComplete: () => {
-                        this.runIntro = true;
-                    }
-                })
-            }
-        });
+        this.startDay();
 
         let clockTimer = this.time.addEvent({
             delay: 1000,
@@ -80,7 +69,7 @@ export class BeachScene extends Phaser.Scene {
                     this.dayTimer += 300;
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
 
-                    // this.dayEndsAt = 9;
+this.dayEndsAt = 9;
                     if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
                         console.log('day ends');
 
@@ -131,21 +120,25 @@ export class BeachScene extends Phaser.Scene {
         this.visitors.runChildUpdate = true;
         this.sendCornCart();
         this.gameOver();
-
+console.log('runIntro', this.runIntro);
         if (this.runIntro === true) {
             this.scrollCamera();
         }
     }
 
     scrollCamera() {
+        console.log('camera', this.cameras.main.scrollY);
         if (this.cameras.main.scrollY !== 250) {
+
+        console.log('scroll camera');
             this.cameras.main.scrollY += 1;
         } else {
             if (this.gameStarted === false) {
                 this.visitors.getChildren().forEach(visitor => {
-                    visitor.canMakeDecisions = true;
+                    // visitor.canMakeDecisions = true;
                 });
 
+                this.runIntro = false;
                 this.gameStarted = true;
                 this.physics.world.setBounds(0, 250, 400, 300);
                 this.player.setCollideWorldBounds(true);
@@ -239,9 +232,10 @@ export class BeachScene extends Phaser.Scene {
     }
 
     getTimerDisplay(seconds) {
-        let hours = Math.floor(seconds / 3600);
+        let hours = Math.floor(seconds / 3600).toString();
         let minutes = Math.floor(seconds % 3600 / 60).toString();
 
+        hours = hours.padStart(2, '0');
         minutes = minutes.padStart(2, '0');
 
         return `${hours}:${minutes}`;
@@ -249,5 +243,31 @@ export class BeachScene extends Phaser.Scene {
 
     nextLevel() {
         this.scene.manager.pause('default');
+        this.dayNumber++;
+        this.cameras.main.scrollY = 0;
+        this.introTextDisplay.setText(`Day ${this.dayNumber}`);
+        // this.introTextDisplay.setAlpha(0);
+        this.startDay();
+    }
+
+    startDay() {
+        console.log('start day');
+        let intro = this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                console.log('day number tween');
+                this.tweens.add({
+                    targets: this.introTextDisplay,
+                    alpha: 1,
+                    duration: 2000,
+                    onComplete: () => {
+                        console.log('runIntro');
+
+                        this.runIntro = true;
+                        intro.destroy();
+                    }
+                })
+            }
+        });
     }
 }

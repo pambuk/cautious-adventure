@@ -8,7 +8,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.playerSpeed = 2;
         this.stamina = 10;
         this.animationKey = 'walk';
-        this.staminaDisplay = scene.add.text(40, 10 + scene.cameraScroll, this.getStaminaForDisplay(this.stamina), { fontSize: '10px' });
+        this.staminaDisplay = scene.add.text(45, 10 + scene.cameraScroll, this.getStaminaForDisplay(this.stamina), { fontSize: '10px' });
 
         this.createEmitters(scene);
         this.createAnimations(scene);
