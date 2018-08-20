@@ -6,14 +6,14 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
         // states: resting, walking, swimming, drowning, returning
         this.state = 'resting';
-        this.bounty = 10;
+        this.saveBounty = 0;
+        this.bounty = this.saveBounty;
         this.origin = { x, y };
         this.z = 1;
         this.chanceToDrown = 0.003;
 
         this.canMakeDecisions = false;
         this.targetLocation = {};
-        // this.graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xaa00aa } });
         this.blanket = scene.add.image(this.x, this.y, 'blanket');
 
         this.maxHealth = 5;
@@ -104,7 +104,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
                 // visitor can go swimming again
                 this.canMakeDecisions = true;
-                this.bounty = 10;
+                this.bounty = this.saveBounty;
                 this.chanceToDrown -= 0.001;
 
                 this.play(`visitor-2-resting`, true);
@@ -147,7 +147,6 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
 
     returnToShore() {
         this.state = 'returning';
-        // this.targetLocation = this.origin;
         this.targetLocation = { x: this.blanket.x, y: this.blanket.y + 8 };
     }
 }
