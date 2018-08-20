@@ -4,6 +4,10 @@ import { Physics } from 'phaser';
 
 export class BeachScene extends Phaser.Scene {
 
+    constructor() {
+        super({ key: 'BeachScene' });
+    }
+
     preload() {
         this.load.image('bg', 'assets/background2.png');
         // this.load.image('bg', 'assets/background.png');
@@ -21,9 +25,15 @@ export class BeachScene extends Phaser.Scene {
         this.load.image('blanket', 'assets/blanket-green.png');
 
         this.load.audio('waves', ['assets/ocean-waves.wav']);
+
+        if (!this.textures.exists('sand')) {
+            this.textures.generate('sand', { data: ['6'], pixelWidth: 1, pixelHeight: 1 });
+        }
     }
 
-    create() {
+    create(data) {
+        console.log('create', data);
+
         this.runIntro = false;
 
         let audio = this.sound.add('waves');
@@ -34,26 +44,27 @@ export class BeachScene extends Phaser.Scene {
         this.deaths = 0;
         this.maxDeaths = 5;
         this.dayEndsAt = 16;
-        this.dayNumber = 1;
+        this.dayNumber = data.dayNumber ? data.dayNumber : 1;
+        this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
-        this.generateVisitors(10);
+        this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
         this.add.existing(this.player);
 
-        this.score = 0;
+        this.score = data.score ? data.score : 0;
         this.scoreDisplay = this.add.text(10, 10 + this.cameraScroll, this.score, { fontSize: '18px' });
 
         this.dayTimer = 3600 * 8;
 
-        this.dayTimerDisplay = this.add.text(340, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), {fontSize: '18px'});
+        this.dayTimerDisplay = this.add.text(340, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), { fontSize: '18px' });
         this.dayTimerDisplay.visible = false;
 
         this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
-        
+
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
@@ -67,9 +78,10 @@ export class BeachScene extends Phaser.Scene {
             callback: () => {
                 if (this.gameStarted === true) {
                     this.dayTimer += 300;
+                    // this.dayTimer += 1800;
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
 
-this.dayEndsAt = 9;
+                    // this.dayEndsAt = 9;
                     if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
                         console.log('day ends');
 
@@ -81,7 +93,9 @@ this.dayEndsAt = 9;
             repeat: -1
         });
 
-        this.createAnimations();
+        if (this.dayNumber === 1) {
+            this.createAnimations();
+        }
 
         this.cornCart = this.physics.add.sprite(500, 290 + this.cameraScroll, 'corn-cart');
         this.cornCartRunning = false;
@@ -120,22 +134,22 @@ this.dayEndsAt = 9;
         this.visitors.runChildUpdate = true;
         this.sendCornCart();
         this.gameOver();
-console.log('runIntro', this.runIntro);
+        // console.log('runIntro', this.runIntro);
         if (this.runIntro === true) {
             this.scrollCamera();
         }
     }
 
     scrollCamera() {
-        console.log('camera', this.cameras.main.scrollY);
+        // console.log('camera', this.cameras.main.scrollY);
         if (this.cameras.main.scrollY !== 250) {
 
-        console.log('scroll camera');
+            // console.log('scroll camera');
             this.cameras.main.scrollY += 1;
         } else {
             if (this.gameStarted === false) {
                 this.visitors.getChildren().forEach(visitor => {
-                    // visitor.canMakeDecisions = true;
+                    visitor.canMakeDecisions = true;
                 });
 
                 this.runIntro = false;
@@ -153,7 +167,7 @@ console.log('runIntro', this.runIntro);
 
     gameOver() {
         if (this.deaths >= 5) {
-            this.scene.manager.pause('default');
+            this.scene.manager.pause('BeachScene');
             this.gameOverDisplay.visible = true;
         }
     }
@@ -212,6 +226,27 @@ console.log('runIntro', this.runIntro);
             frames: this.anims.generateFrameNames('corn-cart', { start: 0, end: 2 }),
             repeat: -1
         });
+
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNames('player', { start: 0, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'player-idle',
+            frames: this.anims.generateFrameNames('player-idle', { start: 0, end: 5 }),
+            frameRate: 2,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'swim',
+            frames: this.anims.generateFrameNames('player-swim', { start: 0, end: 3 }),
+            frameRate: 9,
+            repeat: -1
+        });
     }
 
     generateVisitors(count) {
@@ -221,6 +256,8 @@ console.log('runIntro', this.runIntro);
             let visitorType = Phaser.Math.Between(1, 2);
             let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
             visitor.type = visitorType;
+            visitor.saveBounty = this.saveBounty;
+            visitor.bounty = this.saveBounty;
 
             if (Math.random() >= 0.5) {
                 visitor.flipX = true;
@@ -242,32 +279,49 @@ console.log('runIntro', this.runIntro);
     }
 
     nextLevel() {
-        this.scene.manager.pause('default');
-        this.dayNumber++;
-        this.cameras.main.scrollY = 0;
-        this.introTextDisplay.setText(`Day ${this.dayNumber}`);
-        // this.introTextDisplay.setAlpha(0);
-        this.startDay();
+        this.scene.start('BeachScene', {
+            dayNumber: ++this.dayNumber,
+            score: this.score
+        });
+
+        // this.scene.manager.pause('BeachScene');
+        // this.dayNumber++;
+        // this.cameras.main.scrollY = 0;
+        // this.introTextDisplay.setText(`Day ${this.dayNumber}`);
+        // this.gameStarted = false;
+
+        // this.startDay();
     }
 
     startDay() {
         console.log('start day');
-        let intro = this.time.addEvent({
+
+        // if (typeof this.introTimer === 'undefined') {
+            // console.log('timer first time');
+            this.introTimer = this.time.addEvent(this.getIntroTimerConfig());
+        // } else {
+            // console.log('timer else');
+            // this.introTimer.reset(this.getIntroTimerConfig());
+        // }
+    }
+
+    getIntroTimerConfig() {
+        return {
             delay: 1000,
             callback: () => {
-                console.log('day number tween');
+                // console.log('day number tween');
                 this.tweens.add({
                     targets: this.introTextDisplay,
                     alpha: 1,
                     duration: 2000,
                     onComplete: () => {
-                        console.log('runIntro');
+                        // console.log('onComplete runIntro');
 
                         this.runIntro = true;
-                        intro.destroy();
+                        // intro.destroy();
                     }
                 })
             }
-        });
+        };
     }
 }
