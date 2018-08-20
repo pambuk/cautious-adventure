@@ -11,7 +11,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.staminaDisplay = scene.add.text(45, 10 + scene.cameraScroll, this.getStaminaForDisplay(this.stamina), { fontSize: '10px' });
 
         this.createEmitters(scene);
-        // this.createAnimations(scene);
 
         scene.time.addEvent({
             delay: 1000,
@@ -74,7 +73,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     createEmitters(scene) {
-        // scene.textures.generate('sand', { data: ['6'], pixelWidth: 1, pixelHeight: 1 });
         this.sandEmitter = scene.add.particles('sand').createEmitter({
             speed: 10,
             maxParticles: 70,
@@ -84,29 +82,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
         this.sandEmitter.startFollow(this);
     }
-
-    // createAnimations(scene) {
-    //     scene.anims.create({
-    //         key: 'walk',
-    //         frames: scene.anims.generateFrameNames('player', { start: 0, end: 3 }),
-    //         frameRate: 10,
-    //         repeat: -1
-    //     });
-
-    //     scene.anims.create({
-    //         key: 'player-idle',
-    //         frames: scene.anims.generateFrameNames('player-idle', { start: 0, end: 5 }),
-    //         frameRate: 2,
-    //         repeat: -1
-    //     });
-
-    //     scene.anims.create({
-    //         key: 'swim',
-    //         frames: scene.anims.generateFrameNames('player-swim', { start: 0, end: 3 }),
-    //         frameRate: 9,
-    //         repeat: -1
-    //     });
-    // }
 
     getStaminaForDisplay(stamina) {
         return '.'.repeat(stamina);

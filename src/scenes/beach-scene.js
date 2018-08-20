@@ -134,17 +134,14 @@ export class BeachScene extends Phaser.Scene {
         this.visitors.runChildUpdate = true;
         this.sendCornCart();
         this.gameOver();
-        // console.log('runIntro', this.runIntro);
+
         if (this.runIntro === true) {
             this.scrollCamera();
         }
     }
 
     scrollCamera() {
-        // console.log('camera', this.cameras.main.scrollY);
         if (this.cameras.main.scrollY !== 250) {
-
-            // console.log('scroll camera');
             this.cameras.main.scrollY += 1;
         } else {
             if (this.gameStarted === false) {
@@ -283,42 +280,22 @@ export class BeachScene extends Phaser.Scene {
             dayNumber: ++this.dayNumber,
             score: this.score
         });
-
-        // this.scene.manager.pause('BeachScene');
-        // this.dayNumber++;
-        // this.cameras.main.scrollY = 0;
-        // this.introTextDisplay.setText(`Day ${this.dayNumber}`);
-        // this.gameStarted = false;
-
-        // this.startDay();
     }
 
     startDay() {
-        console.log('start day');
-
-        // if (typeof this.introTimer === 'undefined') {
-            // console.log('timer first time');
-            this.introTimer = this.time.addEvent(this.getIntroTimerConfig());
-        // } else {
-            // console.log('timer else');
-            // this.introTimer.reset(this.getIntroTimerConfig());
-        // }
+        this.introTimer = this.time.addEvent(this.getIntroTimerConfig());
     }
 
     getIntroTimerConfig() {
         return {
             delay: 1000,
             callback: () => {
-                // console.log('day number tween');
                 this.tweens.add({
                     targets: this.introTextDisplay,
                     alpha: 1,
                     duration: 2000,
                     onComplete: () => {
-                        // console.log('onComplete runIntro');
-
                         this.runIntro = true;
-                        // intro.destroy();
                     }
                 })
             }
