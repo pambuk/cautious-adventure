@@ -98,7 +98,9 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
             }
 
             if (this.state === 'returning' && this.arrived(this.targetLocation)) {
-                this.donut.destroy();
+                if (this.donut) {
+                    this.donut.destroy();
+                }
                 this.state = 'resting';
                 this.targetLocation = {};
 

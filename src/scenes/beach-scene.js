@@ -2,6 +2,8 @@ import { Player } from '../game-objects/player';
 import { Visitor } from '../game-objects/visitor';
 import { Physics } from 'phaser';
 
+const DEBUG = false;
+
 export class BeachScene extends Phaser.Scene {
 
     constructor() {
@@ -25,6 +27,7 @@ export class BeachScene extends Phaser.Scene {
         this.load.image('blanket', 'assets/blanket-green.png');
 
         this.load.audio('waves', ['assets/ocean-waves.wav']);
+        this.load.audio('whistle', 'assets/whistle.wav');
 
         if (!this.textures.exists('sand')) {
             this.textures.generate('sand', { data: ['6'], pixelWidth: 1, pixelHeight: 1 });
@@ -37,7 +40,11 @@ export class BeachScene extends Phaser.Scene {
         this.runIntro = false;
 
         let audio = this.sound.add('waves');
-        audio.play({ loop: true });
+        if (!audio.isPlaying) {
+            audio.play({ loop: true });
+        }
+
+        this.whistleSound = this.sound.add('whistle');
 
         this.cameraScroll = 250;
         this.gameStarted = false;
@@ -77,11 +84,18 @@ export class BeachScene extends Phaser.Scene {
             delay: 1000,
             callback: () => {
                 if (this.gameStarted === true) {
-                    this.dayTimer += 300;
-                    // this.dayTimer += 1800;
+                    if (DEBUG) {
+                        this.dayTimer += 1800;
+                    } else {
+                        this.dayTimer += 300;
+                    }
+
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
 
-                    // this.dayEndsAt = 9;
+                    if (DEBUG) {
+                        this.dayEndsAt = 9;
+                    }
+
                     if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
                         console.log('day ends');
 
@@ -145,9 +159,11 @@ export class BeachScene extends Phaser.Scene {
             this.cameras.main.scrollY += 1;
         } else {
             if (this.gameStarted === false) {
-                this.visitors.getChildren().forEach(visitor => {
-                    visitor.canMakeDecisions = true;
-                });
+                if (!DEBUG) {
+                    this.visitors.getChildren().forEach(visitor => {
+                        visitor.canMakeDecisions = true;
+                    });
+                }
 
                 this.runIntro = false;
                 this.gameStarted = true;
@@ -276,9 +292,22 @@ export class BeachScene extends Phaser.Scene {
     }
 
     nextLevel() {
-        this.scene.start('BeachScene', {
-            dayNumber: ++this.dayNumber,
-            score: this.score
+        this.whistleSound.play();
+        this.visitors.getChildren().forEach(visitor => {
+            if (visitor.state !== 'resting' && visitor.state !== 'returning') {
+                visitor.healthDisplay.visible = false;
+                visitor.returnToShore();
+                visitor.canMakeDecisions = false;
+            }
+        });
+
+        this.cameras.main.fade(3000, 0, 0, 0, true, (camera, progress) => {
+            if (1 === progress) {
+                this.scene.start('BeachScene', {
+                    dayNumber: ++this.dayNumber,
+                    score: this.score
+                });
+            }
         });
     }
 
