@@ -92,6 +92,7 @@ export class BeachScene extends Phaser.Scene {
 
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
 
+                    // this.dayEndsAt = 9;
                     if (DEBUG) {
                         this.dayEndsAt = 9;
                     }
@@ -294,10 +295,11 @@ export class BeachScene extends Phaser.Scene {
     nextLevel() {
         this.whistleSound.play();
         this.visitors.getChildren().forEach(visitor => {
+            visitor.canMakeDecisions = false;
+
             if (visitor.state !== 'resting' && visitor.state !== 'returning') {
                 visitor.healthDisplay.visible = false;
                 visitor.returnToShore();
-                visitor.canMakeDecisions = false;
             }
         });
 
