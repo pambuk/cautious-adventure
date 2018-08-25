@@ -1,6 +1,7 @@
 import { Player } from '../game-objects/player';
 import { Visitor } from '../game-objects/visitor';
 import { Physics } from 'phaser';
+import { SmartVisitor } from '../game-objects/smart-visitor';
 
 const DEBUG = false;
 
@@ -57,6 +58,10 @@ export class BeachScene extends Phaser.Scene {
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
+
+        this.smartVisitor = new SmartVisitor(this, 200, 230 + this.cameraScroll, 'visitor-1-resting');
+        this.smartVisitor.type = 1;
+        this.add.existing(this.smartVisitor);
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -147,6 +152,7 @@ export class BeachScene extends Phaser.Scene {
     update(time, delta) {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
+        this.smartVisitor.update(time, delta);
         this.sendCornCart();
         this.gameOver();
 
@@ -162,8 +168,10 @@ export class BeachScene extends Phaser.Scene {
             if (this.gameStarted === false) {
                 if (!DEBUG) {
                     this.visitors.getChildren().forEach(visitor => {
-                        visitor.canMakeDecisions = true;
+                        // visitor.canMakeDecisions = true;
                     });
+
+                    this.smartVisitor.canMakeDecisions = true;
                 }
 
                 this.runIntro = false;
