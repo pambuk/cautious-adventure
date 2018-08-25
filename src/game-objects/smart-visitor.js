@@ -126,6 +126,12 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                 this.play('drowning', true);
             }
         } else if (this.state !== 'resting') {
+            if (this.targetLocation.x > this.x) {
+                this.flipX = false;
+            } else {
+                this.flipX = true;
+            }
+
             this.play('visitor-walk', true);
             if (this.donut) {
                 this.donut.destroy();
