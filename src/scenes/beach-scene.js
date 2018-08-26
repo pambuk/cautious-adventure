@@ -36,8 +36,6 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create(data) {
-        console.log('create', data);
-
         this.runIntro = false;
 
         let audio = this.sound.add('waves');
@@ -56,6 +54,7 @@ export class BeachScene extends Phaser.Scene {
         this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
+
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
@@ -132,6 +131,20 @@ export class BeachScene extends Phaser.Scene {
                 }
             }
         }, null, this);
+
+        this.physics.add.overlap(this.player, this.smartVisitor, (player, visitor) => {
+            if (visitor.state === 'drowning') {
+                this.score += visitor.bounty;
+                this.scoreDisplay.setText(this.score);
+                visitor.bounty = 0;
+                visitor.z = 1;
+                visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
+                if (visitor.state !== 'returning') {
+                    visitor.returnToShore();
+                }
+            }
+
+        });
 
         this.physics.add.overlap(this.player, this.cornCart, () => {
             this.player.stamina += 5;
@@ -277,6 +290,7 @@ export class BeachScene extends Phaser.Scene {
             let y = Phaser.Math.Between(230, 280);
             let visitorType = Phaser.Math.Between(1, 2);
             let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
+            // let visitor = new SmartVisitor(this, x, y + 250, `visitor-${visitorType}-resting`);
             visitor.type = visitorType;
             visitor.saveBounty = this.saveBounty;
             visitor.bounty = this.saveBounty;
@@ -288,6 +302,8 @@ export class BeachScene extends Phaser.Scene {
             this.visitors.add(visitor);
             this.add.existing(visitor);
         }
+
+        // console.log('visitors', this.visitors);
     }
 
     getTimerDisplay(seconds) {
