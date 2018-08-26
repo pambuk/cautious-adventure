@@ -1,6 +1,7 @@
 import { Player } from '../game-objects/player';
 import { Visitor } from '../game-objects/visitor';
 import { Physics } from 'phaser';
+import { SmartVisitor } from '../game-objects/smart-visitor';
 
 const DEBUG = false;
 
@@ -12,7 +13,6 @@ export class BeachScene extends Phaser.Scene {
 
     preload() {
         this.load.image('bg', 'assets/background2.png');
-        // this.load.image('bg', 'assets/background.png');
         this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('visitor-drowning', 'assets/visitor-2-drowning.png', { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
@@ -35,8 +35,6 @@ export class BeachScene extends Phaser.Scene {
     }
 
     create(data) {
-        console.log('create', data);
-
         this.runIntro = false;
 
         let audio = this.sound.add('waves');
@@ -55,8 +53,13 @@ export class BeachScene extends Phaser.Scene {
         this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
+
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
+
+        // this.smartVisitor = new SmartVisitor(this, 200, 230 + this.cameraScroll, 'visitor-1-resting');
+        // this.smartVisitor.type = 1;
+        // this.add.existing(this.smartVisitor);
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -75,7 +78,7 @@ export class BeachScene extends Phaser.Scene {
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
-        this.introTextDisplay = this.add.text(180, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
+        this.introTextDisplay = this.add.text(170, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
         this.introTextDisplay.alpha = 0;
 
         this.startDay();
@@ -123,10 +126,24 @@ export class BeachScene extends Phaser.Scene {
                 visitor.z = 1;
                 visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
                 if (visitor.state !== 'returning') {
-                    visitor.returnToShore();
+                    visitor.returnToBlanket();
                 }
             }
         }, null, this);
+
+        this.physics.add.overlap(this.player, this.smartVisitor, (player, visitor) => {
+            if (visitor.state === 'drowning') {
+                this.score += visitor.bounty;
+                this.scoreDisplay.setText(this.score);
+                visitor.bounty = 0;
+                visitor.z = 1;
+                visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
+                if (visitor.state !== 'returning') {
+                    visitor.returnToBlanket();
+                }
+            }
+
+        });
 
         this.physics.add.overlap(this.player, this.cornCart, () => {
             this.player.stamina += 5;
@@ -147,6 +164,7 @@ export class BeachScene extends Phaser.Scene {
     update(time, delta) {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
+        // this.smartVisitor.update(time, delta);
         this.sendCornCart();
         this.gameOver();
 
@@ -164,6 +182,7 @@ export class BeachScene extends Phaser.Scene {
                     this.visitors.getChildren().forEach(visitor => {
                         visitor.canMakeDecisions = true;
                     });
+
                 }
 
                 this.runIntro = false;
@@ -261,6 +280,12 @@ export class BeachScene extends Phaser.Scene {
             frameRate: 9,
             repeat: -1
         });
+
+        this.anims.create({
+            key: 'visitor-idle',
+            frames: this.anims.generateFrameNames('visitor-2-walk', {end: 0}),
+            frameRate: 0
+        });
     }
 
     generateVisitors(count) {
@@ -268,7 +293,9 @@ export class BeachScene extends Phaser.Scene {
             let x = Phaser.Math.Between(20, 380);
             let y = Phaser.Math.Between(230, 280);
             let visitorType = Phaser.Math.Between(1, 2);
-            let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
+            // let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
+            let visitor = new SmartVisitor(this, x, y + 250, `visitor-${visitorType}-resting`);
+
             visitor.type = visitorType;
             visitor.saveBounty = this.saveBounty;
             visitor.bounty = this.saveBounty;
@@ -299,7 +326,7 @@ export class BeachScene extends Phaser.Scene {
 
             if (visitor.state !== 'resting' && visitor.state !== 'returning') {
                 visitor.healthDisplay.visible = false;
-                visitor.returnToShore();
+                visitor.returnToBlanket();
             }
         });
 

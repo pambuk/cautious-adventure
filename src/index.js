@@ -1,5 +1,5 @@
 import 'phaser';
-import {BeachScene} from "./scenes/beach-scene";
+import { BeachScene } from "./scenes/beach-scene";
 
 const config = {
     type: Phaser.AUTO,
@@ -13,7 +13,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false
+            debug: false 
         }
     }
 };
