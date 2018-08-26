@@ -11,6 +11,9 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
         this.origin = { x, y };
         this.z = 1;
         this.chanceToDrown = 0.003;
+        this.speed = 1;
+        this.topSpeed = 1;
+        this.walkSpeed = .7;
 
         this.canMakeDecisions = false;
         this.targetLocation = {};
@@ -52,6 +55,8 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                 if (this.canMakeDecisions) {
                     switch (this.state) {
                         case 'resting':
+                            this.speed = this.topSpeed;
+
                             console.log('case: resting');
                             if (this.percentage(15)) {
                                 console.log('resting -> go swimming, 15%');
@@ -61,12 +66,16 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                                 // pick sea location
                                 this.pickSwimmingLocation();
                             }
-                            // else if (this.percentage(20)) {
-                            //     console.log('resting -> go for a walk, 20%');
-                            //     this.state = 'walking';
-                            //     // pick beach location
-                            // this.pickBeachLocation();
-                            // }
+                            // else if (this.percentage(100)) {
+                            else if (this.percentage(10)) {
+                                console.log('resting -> go for a walk, 10%');
+
+                                this.state = 'walking';
+                                this.speed = this.walkSpeed;
+
+                                // pick beach location
+                                this.pickBeachLocation();
+                            }
                             // else {
                             //     this.state = 'resting';
                             // }
@@ -87,15 +96,33 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                                 console.log('go-resting');
 
                                 this.state = 'go-resting';
-                                this.returnToShore();
-                            } else if (this.percentage(80)) {
-                                console.log('swimming');
-                                // wait in place
-                                this.state = 'swimming';
+                                this.returnToBlanket();
                             }
+                            // else if (this.percentage(80)) {
+                            //     console.log('swimming');
+
+                            //     // wait in place
+                            //     this.state = 'swimming';
+                            // }
 
                             break;
                         case 'returning':
+                            break;
+                        case 'idle':
+                            console.log('case: idle');
+
+                            if (this.percentage(15)) {
+                                console.log('idle -> go walking');
+
+                                this.state = 'walking';
+                                this.pickBeachLocation();
+                            } else if (this.percentage(50)) {
+                                console.log('idle -> go resting');
+
+                                this.state = 'returning';
+                                this.returnToBlanket();
+                            }
+
                             break;
                     }
 
@@ -120,6 +147,9 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
             } else {
                 this.play('drowning', true);
             }
+        } else if (this.state === 'idle') {
+            this.play('visitor-idle');
+
         } else if (this.state !== 'resting') {
             if (this.targetLocation.x > this.x) {
                 this.flipX = false;
@@ -138,6 +168,8 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
         if (this.health < 1) {
             console.log('DEAD');
         }
+
+        // console.log('smart visitor state', this.state);
     }
 
     pickSwimmingLocation(goNear = false) {
@@ -151,6 +183,8 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
 
             if (this.y + dyCandidate < 200 + this.cameraScroll && this.y + dyCandidate > this.cameraScroll) {
                 this.targetLocation.y = this.y + dyCandidate;
+            } else {
+                this.targetLocation.y = this.y;
             }
         } else {
             this.targetLocation.x = Phaser.Math.Between(0, 400);
@@ -172,7 +206,7 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
             this.goTo(this.targetLocation);
 
             if (
-                (this.state === 'go-swimming' || this.state === 'go-walking') && this.arrived(this.targetLocation)
+                (this.state === 'go-swimming' || this.state === 'walking') && this.arrived(this.targetLocation)
             ) {
                 console.log('aod if, first');
 
@@ -182,7 +216,11 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                     this.state = 'swimming';
                 }
 
+                if (this.state === 'walking') {
+                    console.log('visitor arrived, play idle anim');
 
+                    this.state = 'idle';
+                }
             }
 
             if (this.state === 'returning' && this.arrived(this.targetLocation)) {
@@ -222,14 +260,13 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
     }
 
     arrived(target) {
-        // console.log('arrived', target, this.getBounds());
         // return this.getBounds().contains(target.x, target.y);
         // console.log('arrived', Math.floor(this.y), Math.floor(target.y), Math.floor(this.x), Math.floor(target.x));
 
-        // if (
-        //     Math.floor(this.y) === Math.floor(target.y) && 
-        //     Math.floor(this.x) === Math.floor(target.x)
-        // ) {
+        if (isNaN(Math.floor(target.x)) || isNaN(Math.floor(target.y))) {
+            console.log('isNaN', target.x, target.y, Math.floor(target.x), Math.floor(target.y), this);
+        }
+
         let flooredX = Math.floor(this.x);
         let flooredY = Math.floor(this.y);
 
@@ -255,18 +292,16 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
 
         // move towards target
         if (!isNaN(toPointX) && !isNaN(toPointY)) {
-            this.x += toPointX * 1;
-            this.y += toPointY * 1;
+            this.x += toPointX * this.speed;
+            this.y += toPointY * this.speed;
         }
     }
 
-    returnToShore() {
-        // console.log('return to shore entry state', this.state);
+    returnToBlanket() {
         this.state = 'returning';
         this.targetLocation = { x: this.blanket.x, y: this.blanket.y };
-        // this.targetLocation = { x: this.blanket.x, y: this.blanket.y + 8 };
 
-        console.log('return to shore:', this.targetLocation, { x: this.x, y: this.y });
+        console.log('return to blanket:', this.targetLocation, { x: this.x, y: this.y });
     }
 
     percentage(desired) {

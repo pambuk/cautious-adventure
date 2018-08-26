@@ -79,7 +79,7 @@ export class BeachScene extends Phaser.Scene {
         this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
         this.gameOverDisplay.visible = false;
 
-        this.introTextDisplay = this.add.text(180, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
+        this.introTextDisplay = this.add.text(170, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
         this.introTextDisplay.alpha = 0;
 
         this.startDay();
@@ -127,7 +127,7 @@ export class BeachScene extends Phaser.Scene {
                 visitor.z = 1;
                 visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
                 if (visitor.state !== 'returning') {
-                    visitor.returnToShore();
+                    visitor.returnToBlanket();
                 }
             }
         }, null, this);
@@ -140,7 +140,7 @@ export class BeachScene extends Phaser.Scene {
                 visitor.z = 1;
                 visitor.donut = this.add.image(visitor.x, visitor.y + 1, 'donut');
                 if (visitor.state !== 'returning') {
-                    visitor.returnToShore();
+                    visitor.returnToBlanket();
                 }
             }
 
@@ -282,6 +282,12 @@ export class BeachScene extends Phaser.Scene {
             frameRate: 9,
             repeat: -1
         });
+
+        this.anims.create({
+            key: 'visitor-idle',
+            frames: this.anims.generateFrameNames('visitor-2-walk', {end: 0}),
+            frameRate: 0
+        });
     }
 
     generateVisitors(count) {
@@ -323,7 +329,7 @@ export class BeachScene extends Phaser.Scene {
 
             if (visitor.state !== 'resting' && visitor.state !== 'returning') {
                 visitor.healthDisplay.visible = false;
-                visitor.returnToShore();
+                visitor.returnToBlanket();
             }
         });
 

@@ -147,7 +147,7 @@ export class Visitor extends Phaser.Physics.Arcade.Sprite {
         this.y += toPointY * 1;
     }
 
-    returnToShore() {
+    returnToBlanket() {
         this.state = 'returning';
         this.targetLocation = { x: this.blanket.x, y: this.blanket.y + 8 };
     }
