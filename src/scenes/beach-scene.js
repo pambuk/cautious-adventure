@@ -1,6 +1,4 @@
 import { Player } from '../game-objects/player';
-import { Visitor } from '../game-objects/visitor';
-import { Physics } from 'phaser';
 import { SmartVisitor } from '../game-objects/smart-visitor';
 
 const DEBUG = false;
