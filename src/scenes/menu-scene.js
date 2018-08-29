@@ -42,6 +42,9 @@ export class MenuScene extends Phaser.Scene {
         this.cloud1 = this.add.image(300, 0, 'cloud-1').setOrigin(0);
         this.cloud2 = this.add.image(150, 0, 'cloud-2').setOrigin(0);
 
+        this.cloud1reflection = this.add.image(300, 130, 'cloud-1').setOrigin(0).setScale(1, -1);
+        this.cloud1reflection.tint = 0x5555ff;
+
         this.cloud1.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
         this.cloud2.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
 
@@ -58,17 +61,26 @@ export class MenuScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        this.moveCloud(this.cloud1);
+        this.moveCloud(this.cloud1, this.cloud1reflection);
+        // this.moveCloud(this.cloud1);
         this.moveCloud(this.cloud2);
     }
 
-    moveCloud(cloud) {
+    moveCloud(cloud, reflection) {
         if (cloud.x < -cloud.width) {
             cloud.x = 400 + cloud.width + 50;
             cloud.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
+
+            if (typeof reflection !== 'undefined') {
+                reflection.x = cloud.x;
+            }
         }
 
         cloud.x -= cloud.cloudSpeed;
+
+        if (typeof reflection !== 'undefined') {
+            reflection.x -= cloud.cloudSpeed;
+        }
     }
 
 }
