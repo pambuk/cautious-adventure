@@ -28,10 +28,9 @@ export class BeachScene extends Phaser.Scene {
         this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
-        this.cloud1 = this.add.image(data.cloud1x, 0, 'cloud-1').setOrigin(0);
-        this.cloud2 = this.add.image(data.cloud2x, 0, 'cloud-2').setOrigin(0);
-        this.cloud1.cloudSpeed = data.cloud1speed;
-        this.cloud2.cloudSpeed = data.cloud2speed;
+
+        this.addClouds(data);
+        this.menuScene = this.scene.get('MenuScene');
 
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
@@ -139,7 +138,7 @@ export class BeachScene extends Phaser.Scene {
     update(time, delta) {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
-        // this.smartVisitor.update(time, delta);
+
         this.sendCornCart();
         this.gameOver();
 
@@ -147,9 +146,9 @@ export class BeachScene extends Phaser.Scene {
             this.scrollCamera();
         }
 
-        if (this.cameras.main.scrollY < 50) {
-            this.moveCloud(this.cloud1);
-            this.moveCloud(this.cloud2);
+        if (this.cameras.main.scrollY < 130) {
+            this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
+            this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
         }
     }
 
@@ -344,12 +343,16 @@ export class BeachScene extends Phaser.Scene {
         };
     }
 
-    moveCloud(cloud) {
-        if (cloud.x < -cloud.width) {
-            cloud.x = 400 + cloud.width + 50;
-            cloud.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
-        }
+    addClouds(data) {
+        this.cloud1 = this.add.image(data.cloud1x, -5, 'cloud-1').setOrigin(0);
+        this.cloud2 = this.add.image(data.cloud2x, -5, 'cloud-2').setOrigin(0);
+        this.cloud1.cloudSpeed = data.cloud1speed;
+        this.cloud2.cloudSpeed = data.cloud2speed;
 
-        cloud.x -= cloud.cloudSpeed;
+        this.cloud1reflection = this.add.image(this.cloud1.x, 130, 'cloud-1').setOrigin(0).setScale(1, -1);
+        this.cloud1reflection.tint = 0x5555ff;
+
+        this.cloud2reflection = this.add.image(this.cloud2.x, 130, 'cloud-2').setOrigin(0).setScale(1, -1);
+        this.cloud2reflection.tint = 0x5555ff;
     }
 }
