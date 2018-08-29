@@ -9,29 +9,6 @@ export class BeachScene extends Phaser.Scene {
         super({ key: 'BeachScene' });
     }
 
-    preload() {
-        this.load.image('bg', 'assets/background2.png');
-        this.load.spritesheet('player', 'assets/dude.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-drowning', 'assets/visitor-2-drowning.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('player-swim', 'assets/dude-swimming.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-1-resting', 'assets/visitor-1-resting.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-2-resting', 'assets/visitor-2-resting.png', { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet('visitor-2-walk', 'assets/visitor-2-walk.png', { frameHeight: 16, frameWidth: 16 });
-        this.load.spritesheet('visitor-2-drowning-2', 'assets/visitor-2-drowning-2.png', { frameHeight: 16, frameWidth: 16 });
-        this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
-        this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
-
-        this.load.image('donut', 'assets/donut.png');
-        this.load.image('blanket', 'assets/blanket-green.png');
-
-        this.load.audio('waves', ['assets/ocean-waves.wav']);
-        this.load.audio('whistle', 'assets/whistle.wav');
-
-        if (!this.textures.exists('sand')) {
-            this.textures.generate('sand', { data: ['6'], pixelWidth: 1, pixelHeight: 1 });
-        }
-    }
-
     create(data) {
         this.runIntro = false;
 
@@ -51,13 +28,13 @@ export class BeachScene extends Phaser.Scene {
         this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
+        this.cloud1 = this.add.image(data.cloud1x, 0, 'cloud-1').setOrigin(0);
+        this.cloud2 = this.add.image(data.cloud2x, 0, 'cloud-2').setOrigin(0);
+        this.cloud1.cloudSpeed = data.cloud1speed;
+        this.cloud2.cloudSpeed = data.cloud2speed;
 
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
-
-        // this.smartVisitor = new SmartVisitor(this, 200, 230 + this.cameraScroll, 'visitor-1-resting');
-        // this.smartVisitor.type = 1;
-        // this.add.existing(this.smartVisitor);
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -168,6 +145,11 @@ export class BeachScene extends Phaser.Scene {
 
         if (this.runIntro === true) {
             this.scrollCamera();
+        }
+
+        if (this.cameras.main.scrollY < 50) {
+            this.moveCloud(this.cloud1);
+            this.moveCloud(this.cloud2);
         }
     }
 
@@ -281,7 +263,7 @@ export class BeachScene extends Phaser.Scene {
 
         this.anims.create({
             key: 'visitor-idle',
-            frames: this.anims.generateFrameNames('visitor-2-walk', {end: 0}),
+            frames: this.anims.generateFrameNames('visitor-2-walk', { end: 0 }),
             frameRate: 0
         });
     }
@@ -332,7 +314,11 @@ export class BeachScene extends Phaser.Scene {
             if (1 === progress) {
                 this.scene.start('BeachScene', {
                     dayNumber: ++this.dayNumber,
-                    score: this.score
+                    score: this.score,
+                    cloud1x: Phaser.Math.Between(200, 400),
+                    cloud2x: Phaser.Math.Between(0, 200),
+                    cloud1speed: this.cloud1.cloudSpeed,
+                    cloud2speed: this.cloud2.cloudSpeed
                 });
             }
         });
@@ -356,5 +342,14 @@ export class BeachScene extends Phaser.Scene {
                 })
             }
         };
+    }
+
+    moveCloud(cloud) {
+        if (cloud.x < -cloud.width) {
+            cloud.x = 400 + cloud.width + 50;
+            cloud.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
+        }
+
+        cloud.x -= cloud.cloudSpeed;
     }
 }
