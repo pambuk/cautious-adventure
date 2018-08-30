@@ -64,7 +64,8 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             this.visitors = this.physics.add.group();
             this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
-            // this.waves = this.physics.add.group();
+            this.waves = this.physics.add.group();
+            // this.wave = this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave');
 
             // player
             this.player = new _player.Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -110,6 +111,14 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
                             clockTimer.destroy();
                             _this2.nextLevel();
+                        }
+
+                        // waves
+                        if (_this2.percentage(100)) {
+
+                            // this.waves.add(this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave'));
+                            // this.waves.get()
+
                         }
                     }
                 },
@@ -158,6 +167,10 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 _this2.player.staminaDisplay.setText(_this2.player.getStaminaForDisplay(_this2.player.stamina));
             });
 
+            this.physics.add.overlap(this.visitors, this.waves, function (visitor, wave) {
+                console.log('wave overlap', visitor, wave);
+            });
+
             this.cursors = this.input.keyboard.createCursorKeys();
 
             this.scoreDisplay.visible = false;
@@ -181,7 +194,16 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
                 this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
             }
+
+            this.moveWaves();
+
+            this.visitors.children.iterate(function (visitor) {
+                visitor.depth = visitor.y;
+            });
         }
+    }, {
+        key: 'moveWaves',
+        value: function moveWaves() {}
     }, {
         key: 'scrollCamera',
         value: function scrollCamera() {
@@ -319,7 +341,8 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             this.anims.create({
                 key: 'wave-moving',
                 frames: this.anims.generateFrameNames('wave', { start: 0, end: 11 }),
-                frameRate: 8
+                frameRate: 8,
+                repeat: -1
             });
         }
     }, {
@@ -595,7 +618,6 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
         _this.saveBounty = 0;
         _this.bounty = _this.saveBounty;
         _this.origin = { x: x, y: y };
-        _this.z = 1;
         _this.chanceToDrown = 0.003;
         _this.speed = 1;
         _this.topSpeed = 1;
@@ -604,6 +626,7 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
         _this.canMakeDecisions = false;
         _this.targetLocation = {};
         _this.blanket = scene.add.image(_this.x, _this.y, 'blanket');
+        _this.blanket.setDepth(0);
 
         _this.maxHealth = 5;
         _this.health = _this.maxHealth;

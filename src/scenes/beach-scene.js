@@ -35,7 +35,8 @@ export class BeachScene extends Phaser.Scene {
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
-        // this.waves = this.physics.add.group();
+        this.waves = this.physics.add.group();
+        // this.wave = this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave');
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -81,6 +82,14 @@ export class BeachScene extends Phaser.Scene {
 
                         clockTimer.destroy();
                         this.nextLevel();
+                    }
+
+                    // waves
+                    if (this.percentage(100)) {
+
+                        // this.waves.add(this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave'));
+                        // this.waves.get()
+
                     }
                 }
             },
@@ -130,6 +139,11 @@ export class BeachScene extends Phaser.Scene {
             this.player.staminaDisplay.setText(this.player.getStaminaForDisplay(this.player.stamina));
         });
 
+        this.physics.add.overlap(this.visitors, this.waves, (visitor, wave) => {
+            console.log('wave overlap', visitor, wave);
+
+        });
+
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.scoreDisplay.visible = false;
@@ -147,15 +161,21 @@ export class BeachScene extends Phaser.Scene {
         if (this.runIntro === true) {
             this.scrollCamera();
         }
-
+    
         if (this.cameras.main.scrollY < 130) {
             this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
             this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
         }
 
+        this.moveWaves();
+
         this.visitors.children.iterate((visitor) => {
             visitor.depth = visitor.y;
         });
+    }
+
+    moveWaves() {
+
     }
 
     scrollCamera() {
@@ -286,7 +306,8 @@ export class BeachScene extends Phaser.Scene {
         this.anims.create({
             key: 'wave-moving',
             frames: this.anims.generateFrameNames('wave', {start: 0, end: 11}),
-            frameRate: 8
+            frameRate: 8,
+            repeat: -1
         });
     }
 
