@@ -152,6 +152,10 @@ export class BeachScene extends Phaser.Scene {
             this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
             this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
         }
+
+        this.visitors.children.iterate((visitor) => {
+            visitor.setDepth(this.y);
+        });
     }
 
     scrollCamera() {
