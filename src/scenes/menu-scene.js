@@ -17,6 +17,7 @@ export class MenuScene extends Phaser.Scene {
         this.load.spritesheet('visitor-2-drowning-2', 'assets/visitor-2-drowning-2.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
+        this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32});
 
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
@@ -39,14 +40,8 @@ export class MenuScene extends Phaser.Scene {
         }
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
-        this.cloud1 = this.add.image(300, 0, 'cloud-1').setOrigin(0);
-        this.cloud2 = this.add.image(150, 0, 'cloud-2').setOrigin(0);
 
-        this.cloud1reflection = this.add.image(300, 130, 'cloud-1').setOrigin(0).setScale(1, -1);
-        this.cloud1reflection.tint = 0x5555ff;
-
-        this.cloud1.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
-        this.cloud2.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
+        this.addClouds();
 
         // button
         let startButton = new TextButton(this, 180, 100, 'START', null, () => {
@@ -62,8 +57,21 @@ export class MenuScene extends Phaser.Scene {
 
     update(time, delta) {
         this.moveCloud(this.cloud1, this.cloud1reflection);
-        // this.moveCloud(this.cloud1);
-        this.moveCloud(this.cloud2);
+        this.moveCloud(this.cloud2, this.cloud2reflection);
+    }
+
+    addClouds() {
+        this.cloud1 = this.add.image(300, -5, 'cloud-1').setOrigin(0);
+        this.cloud2 = this.add.image(150, -5, 'cloud-2').setOrigin(0);
+
+        this.cloud1.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
+        this.cloud2.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
+
+        this.cloud1reflection = this.add.image(300, 130, 'cloud-1').setOrigin(0).setScale(1, -1);
+        this.cloud1reflection.tint = 0x5555ff;
+
+        this.cloud2reflection = this.add.image(150, 130, 'cloud-2').setOrigin(0).setScale(1, -1);
+        this.cloud2reflection.tint = 0x5555ff;
     }
 
     moveCloud(cloud, reflection) {

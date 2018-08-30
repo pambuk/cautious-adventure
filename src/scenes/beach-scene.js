@@ -28,13 +28,15 @@ export class BeachScene extends Phaser.Scene {
         this.saveBounty = 9 + this.dayNumber;
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
-        this.cloud1 = this.add.image(data.cloud1x, 0, 'cloud-1').setOrigin(0);
-        this.cloud2 = this.add.image(data.cloud2x, 0, 'cloud-2').setOrigin(0);
-        this.cloud1.cloudSpeed = data.cloud1speed;
-        this.cloud2.cloudSpeed = data.cloud2speed;
+
+        this.addClouds(data);
+        this.menuScene = this.scene.get('MenuScene');
 
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
+
+        this.waves = this.physics.add.group();
+        // this.wave = this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave');
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -80,6 +82,14 @@ export class BeachScene extends Phaser.Scene {
 
                         clockTimer.destroy();
                         this.nextLevel();
+                    }
+
+                    // waves
+                    if (this.percentage(100)) {
+
+                        // this.waves.add(this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave'));
+                        // this.waves.get()
+
                     }
                 }
             },
@@ -129,6 +139,11 @@ export class BeachScene extends Phaser.Scene {
             this.player.staminaDisplay.setText(this.player.getStaminaForDisplay(this.player.stamina));
         });
 
+        this.physics.add.overlap(this.visitors, this.waves, (visitor, wave) => {
+            console.log('wave overlap', visitor, wave);
+
+        });
+
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.scoreDisplay.visible = false;
@@ -139,18 +154,28 @@ export class BeachScene extends Phaser.Scene {
     update(time, delta) {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
-        // this.smartVisitor.update(time, delta);
+
         this.sendCornCart();
         this.gameOver();
 
         if (this.runIntro === true) {
             this.scrollCamera();
         }
-
-        if (this.cameras.main.scrollY < 50) {
-            this.moveCloud(this.cloud1);
-            this.moveCloud(this.cloud2);
+    
+        if (this.cameras.main.scrollY < 130) {
+            this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
+            this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
         }
+
+        this.moveWaves();
+
+        this.visitors.children.iterate((visitor) => {
+            visitor.depth = visitor.y;
+        });
+    }
+
+    moveWaves() {
+
     }
 
     scrollCamera() {
@@ -162,7 +187,6 @@ export class BeachScene extends Phaser.Scene {
                     this.visitors.getChildren().forEach(visitor => {
                         visitor.canMakeDecisions = true;
                     });
-
                 }
 
                 this.runIntro = false;
@@ -266,6 +290,25 @@ export class BeachScene extends Phaser.Scene {
             frames: this.anims.generateFrameNames('visitor-2-walk', { end: 0 }),
             frameRate: 0
         });
+
+        this.anims.create({
+            key: 'wave-start',
+            frames: this.anims.generateFrameNames('wave', {end: 0}),
+            frameRate: 0
+        });
+
+        this.anims.create({
+            key: 'wave-end',
+            frames: this.anims.generateFrameNames('wave', {start: 11}),
+            frameRate: 0
+        })
+
+        this.anims.create({
+            key: 'wave-moving',
+            frames: this.anims.generateFrameNames('wave', {start: 0, end: 11}),
+            frameRate: 8,
+            repeat: -1
+        });
     }
 
     generateVisitors(count) {
@@ -344,12 +387,20 @@ export class BeachScene extends Phaser.Scene {
         };
     }
 
-    moveCloud(cloud) {
-        if (cloud.x < -cloud.width) {
-            cloud.x = 400 + cloud.width + 50;
-            cloud.cloudSpeed = Phaser.Math.FloatBetween(.2, .5);
-        }
+    addClouds(data) {
+        this.cloud1 = this.add.image(data.cloud1x, -5, 'cloud-1').setOrigin(0);
+        this.cloud2 = this.add.image(data.cloud2x, -5, 'cloud-2').setOrigin(0);
+        this.cloud1.cloudSpeed = data.cloud1speed;
+        this.cloud2.cloudSpeed = data.cloud2speed;
 
-        cloud.x -= cloud.cloudSpeed;
+        this.cloud1reflection = this.add.image(this.cloud1.x, 130, 'cloud-1').setOrigin(0).setScale(1, -1);
+        this.cloud1reflection.tint = 0x5555ff;
+
+        this.cloud2reflection = this.add.image(this.cloud2.x, 130, 'cloud-2').setOrigin(0).setScale(1, -1);
+        this.cloud2reflection.tint = 0x5555ff;
+    }
+
+    percentage(desired) {
+        return Phaser.Math.Between(0, 100) < desired;
     }
 }

@@ -9,7 +9,6 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
         this.saveBounty = 0;
         this.bounty = this.saveBounty;
         this.origin = { x, y };
-        this.z = 1;
         this.chanceToDrown = 0.003;
         this.speed = 1;
         this.topSpeed = 1;
@@ -18,6 +17,7 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
         this.canMakeDecisions = false;
         this.targetLocation = {};
         this.blanket = scene.add.image(this.x, this.y, 'blanket');
+        this.blanket.setDepth(0);
 
         this.maxHealth = 5;
         this.health = this.maxHealth;
