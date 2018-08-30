@@ -154,7 +154,7 @@ export class BeachScene extends Phaser.Scene {
         }
 
         this.visitors.children.iterate((visitor) => {
-            visitor.setDepth(this.y);
+            visitor.depth = visitor.y;
         });
     }
 
