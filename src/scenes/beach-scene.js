@@ -35,6 +35,8 @@ export class BeachScene extends Phaser.Scene {
         this.visitors = this.physics.add.group();
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
+        // this.waves = this.physics.add.group();
+
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
         this.add.existing(this.player);
@@ -161,7 +163,6 @@ export class BeachScene extends Phaser.Scene {
                     this.visitors.getChildren().forEach(visitor => {
                         visitor.canMakeDecisions = true;
                     });
-
                 }
 
                 this.runIntro = false;
@@ -265,6 +266,24 @@ export class BeachScene extends Phaser.Scene {
             frames: this.anims.generateFrameNames('visitor-2-walk', { end: 0 }),
             frameRate: 0
         });
+
+        this.anims.crate({
+            key: 'wave-start',
+            frames: this.anims.generateFrameNames('wave', {end: 0}),
+            frameRate: 0
+        });
+
+        this.anims.create({
+            key: 'wave-end',
+            frames: this.anims.generateFrameNames('wave', {start: 11}),
+            frameRate: 0
+        })
+
+        this.anims.create({
+            key: 'wave-moving',
+            frames: this.anims.generateFrameNames('wave', {start: 0, end: 11}),
+            frameRate: 8
+        });
     }
 
     generateVisitors(count) {
@@ -354,5 +373,9 @@ export class BeachScene extends Phaser.Scene {
 
         this.cloud2reflection = this.add.image(this.cloud2.x, 130, 'cloud-2').setOrigin(0).setScale(1, -1);
         this.cloud2reflection.tint = 0x5555ff;
+    }
+
+    percentage(desired) {
+        return Phaser.Math.Between(0, 100) < desired;
     }
 }
