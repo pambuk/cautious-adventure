@@ -267,7 +267,7 @@ export class BeachScene extends Phaser.Scene {
             frameRate: 0
         });
 
-        this.anims.crate({
+        this.anims.create({
             key: 'wave-start',
             frames: this.anims.generateFrameNames('wave', {end: 0}),
             frameRate: 0
