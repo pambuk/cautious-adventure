@@ -1,6 +1,7 @@
-export class TextButton extends Phaser.GameObjects.Text {
-    constructor(scene, x, y, text, style, callback) {
-        super(scene, x, y, text, style);
+// export class TextButton extends Phaser.GameObjects.Text {
+export class TextButton extends Phaser.GameObjects.BitmapText {
+    constructor(scene, x, y, font, text, size, callback) {
+        super(scene, x, y, font, text, size);
         this
             .setInteractive({useHandCursor: true})
             .on('pointerover', () => this.enterButtonHoverState())

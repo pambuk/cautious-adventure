@@ -18,7 +18,7 @@ export class Wave extends Phaser.Physics.Arcade.Sprite {
     start() {
         console.log('wave start');
         this.x = Phaser.Math.Between(0, 400);
-        this.y = Phaser.Math.Between(this.cameraScroll - 50, 130 + this.cameraScroll);
+        this.y = Phaser.Math.Between(this.cameraScroll - 50, 125 + this.cameraScroll);
 
         this.setActive(true);
         this.setVisible(true);

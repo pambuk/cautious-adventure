@@ -44,19 +44,19 @@ export class BeachScene extends Phaser.Scene {
         this.add.existing(this.player);
 
         this.score = data.score ? data.score : 0;
-        this.scoreDisplay = this.add.text(10, 10 + this.cameraScroll, this.score, { fontSize: '18px' });
+        this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 18);
 
         this.dayTimer = 3600 * 8;
 
-        this.dayTimerDisplay = this.add.text(340, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), { fontSize: '18px' });
+        this.dayTimerDisplay = this.add.bitmapText(300, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 18);
         this.dayTimerDisplay.visible = false;
 
         this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
 
-        this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
+        this.gameOverDisplay = this.add.bitmapText(100, 100 + this.cameraScroll, 'gameFont', 'GAME OVER', 24);
         this.gameOverDisplay.visible = false;
 
-        this.introTextDisplay = this.add.text(170, 100, `Day ${this.dayNumber}`, { fontSize: '24px' });
+        this.introTextDisplay = this.add.bitmapText(145, 100, 'gameFont', `Day ${this.dayNumber}`, 24);
         this.introTextDisplay.alpha = 0;
 
         this.startDay();
