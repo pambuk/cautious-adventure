@@ -1,5 +1,6 @@
 import { Player } from '../game-objects/player';
 import { SmartVisitor } from '../game-objects/smart-visitor';
+import { Wave } from '../game-objects/wave';
 
 const DEBUG = false;
 
@@ -12,9 +13,9 @@ export class BeachScene extends Phaser.Scene {
     create(data) {
         this.runIntro = false;
 
-        let audio = this.sound.add('waves');
-        if (!audio.isPlaying) {
-            audio.play({ loop: true });
+        this.audio = this.sound.add('waves');
+        if (!this.audio.isPlaying) {
+            this.audio.play({ loop: true });
         }
 
         this.whistleSound = this.sound.add('whistle');
@@ -36,7 +37,7 @@ export class BeachScene extends Phaser.Scene {
         this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
         this.waves = this.physics.add.group();
-        // this.wave = this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave');
+        this.generateWaves();
 
         // player
         this.player = new Player(this, 300, 250 + this.cameraScroll, 'player');
@@ -72,7 +73,6 @@ export class BeachScene extends Phaser.Scene {
 
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
 
-                    // this.dayEndsAt = 9;
                     if (DEBUG) {
                         this.dayEndsAt = 9;
                     }
@@ -86,10 +86,8 @@ export class BeachScene extends Phaser.Scene {
 
                     // waves
                     if (this.percentage(100)) {
-
-                        // this.waves.add(this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave'));
-                        // this.waves.get()
-
+                        let wave = this.waves.get()
+                        wave.start();
                     }
                 }
             },
@@ -140,8 +138,9 @@ export class BeachScene extends Phaser.Scene {
         });
 
         this.physics.add.overlap(this.visitors, this.waves, (visitor, wave) => {
-            console.log('wave overlap', visitor, wave);
-
+            if (wave.drowny && (visitor.state === 'swimming' || visitor.state === 'go-swimming')) {
+                visitor.state = 'drowning';
+            }
         });
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -154,6 +153,7 @@ export class BeachScene extends Phaser.Scene {
     update(time, delta) {
         this.player.update(this.cursors, time, delta);
         this.visitors.runChildUpdate = true;
+        this.waves.runChildUpdate = true;
 
         this.sendCornCart();
         this.gameOver();
@@ -167,15 +167,16 @@ export class BeachScene extends Phaser.Scene {
             this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
         }
 
-        this.moveWaves();
-
         this.visitors.children.iterate((visitor) => {
             visitor.depth = visitor.y;
         });
     }
 
-    moveWaves() {
-
+    generateWaves() {
+        for (let i = 0; i < 10; i++) {
+            let wave = new Wave(this, 0, 0 + this.cameraScroll, 'wave');
+            this.waves.add(wave);
+        }
     }
 
     scrollCamera() {
@@ -307,7 +308,7 @@ export class BeachScene extends Phaser.Scene {
             key: 'wave-moving',
             frames: this.anims.generateFrameNames('wave', {start: 0, end: 11}),
             frameRate: 8,
-            repeat: -1
+            repeat: 1
         });
     }
 
@@ -355,6 +356,8 @@ export class BeachScene extends Phaser.Scene {
 
         this.cameras.main.fade(3000, 0, 0, 0, true, (camera, progress) => {
             if (1 === progress) {
+                this.audio.stop();
+            
                 this.scene.start('BeachScene', {
                     dayNumber: ++this.dayNumber,
                     score: this.score,
