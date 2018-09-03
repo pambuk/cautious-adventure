@@ -17,7 +17,7 @@ export class MenuScene extends Phaser.Scene {
         this.load.spritesheet('visitor-2-drowning-2', 'assets/visitor-2-drowning-2.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
-        this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32});
+        this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32 });
 
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
@@ -31,6 +31,8 @@ export class MenuScene extends Phaser.Scene {
 
         this.load.image('cloud-1', 'assets/cloud-1.png');
         this.load.image('cloud-2', 'assets/cloud-2.png');
+
+        this.load.bitmapFont('gameFont', 'assets/fonts/atari-classic.png', 'assets/fonts/atari-classic.xml');
     }
 
     create(data) {
@@ -40,11 +42,11 @@ export class MenuScene extends Phaser.Scene {
         }
 
         this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
-
         this.addClouds();
+        this.add.bitmapText(160, 100, 'gameFont', 'START', 18);
 
-        // button
-        let startButton = new TextButton(this, 180, 100, 'START', null, () => {
+        let anyKey = this.add.bitmapText(145, 150, 'gameFont', 'press any key', 10);
+        this.input.keyboard.on('keyup', () => {
             this.scene.start('BeachScene', {
                 cloud1x: this.cloud1.x, cloud2x: this.cloud2.x,
                 cloud1speed: this.cloud1.cloudSpeed,
@@ -52,7 +54,17 @@ export class MenuScene extends Phaser.Scene {
             });
         });
 
-        this.add.existing(startButton);
+        this.time.addEvent({
+            delay: 500,
+            callback: () => {
+                if (anyKey.visible) {
+                    anyKey.setVisible(false);
+                } else {
+                    anyKey.setVisible(true);
+                }
+            },
+            repeat: -1
+        });
     }
 
     update(time, delta) {
