@@ -68,7 +68,7 @@ export class BeachScene extends Phaser.Scene {
                     if (DEBUG) {
                         this.dayTimer += 1800;
                     } else {
-                        this.dayTimer += 300;
+                        this.dayTimer += 600;
                     }
 
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
@@ -173,7 +173,7 @@ export class BeachScene extends Phaser.Scene {
     }
 
     generateWaves() {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 15; i++) {
             let wave = new Wave(this, 0, 0 + this.cameraScroll, 'wave');
             this.waves.add(wave);
         }
