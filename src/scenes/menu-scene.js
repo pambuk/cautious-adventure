@@ -18,6 +18,7 @@ export class MenuScene extends Phaser.Scene {
         this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
         this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32 });
+        this.load.spritesheet('stamina-bar', 'assets/stamina-bar.png', {frameHeight: 16, frameWidth: 16});
 
         this.load.image('donut', 'assets/donut.png');
         this.load.image('blanket', 'assets/blanket-green.png');
@@ -31,6 +32,7 @@ export class MenuScene extends Phaser.Scene {
 
         this.load.image('cloud-1', 'assets/cloud-1.png');
         this.load.image('cloud-2', 'assets/cloud-2.png');
+        this.load.image('visitor-lifebar', 'assets/visitor-lifebar.png');
 
         this.load.bitmapFont('gameFont', 'assets/fonts/atari-classic.png', 'assets/fonts/atari-classic.xml');
     }
@@ -102,5 +104,4 @@ export class MenuScene extends Phaser.Scene {
             reflection.x -= cloud.cloudSpeed;
         }
     }
-
 }
