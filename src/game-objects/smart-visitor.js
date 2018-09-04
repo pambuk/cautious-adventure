@@ -40,7 +40,7 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
                         scene.deaths = scene.maxDeaths;
                     }
 
-                    scene.deathsDisplay.setText(scene.deaths);
+                    scene.displayDeaths();
                 }
             },
             repeat: -1

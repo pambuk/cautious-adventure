@@ -31,6 +31,7 @@ export class MenuScene extends Phaser.Scene {
 
         this.load.image('cloud-1', 'assets/cloud-1.png');
         this.load.image('cloud-2', 'assets/cloud-2.png');
+        this.load.image('visitor-lifebar', 'assets/visitor-lifebar.png');
 
         this.load.bitmapFont('gameFont', 'assets/fonts/atari-classic.png', 'assets/fonts/atari-classic.xml');
     }
@@ -102,5 +103,4 @@ export class MenuScene extends Phaser.Scene {
             reflection.x -= cloud.cloudSpeed;
         }
     }
-
 }
