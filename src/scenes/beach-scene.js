@@ -44,13 +44,12 @@ export class BeachScene extends Phaser.Scene {
         this.add.existing(this.player);
 
         this.score = data.score ? data.score : 0;
-        this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 18);
+        this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 16);
 
         this.dayTimer = 3600 * 8;
 
-        this.dayTimerDisplay = this.add.bitmapText(300, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 18);
+        this.dayTimerDisplay = this.add.bitmapText(310, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 16);
         this.dayTimerDisplay.visible = false;
-
 
         this.gameOverDisplay = this.add.bitmapText(100, 100 + this.cameraScroll, 'gameFont', 'GAME OVER', 24);
         this.gameOverDisplay.visible = false;
@@ -67,7 +66,7 @@ export class BeachScene extends Phaser.Scene {
                     if (DEBUG) {
                         this.dayTimer += 1800;
                     } else {
-                        this.dayTimer += 600;
+                        this.dayTimer += 900;
                     }
 
                     this.dayTimerDisplay.setText(this.getTimerDisplay(this.dayTimer));
@@ -122,16 +121,15 @@ export class BeachScene extends Phaser.Scene {
                     visitor.returnToBlanket();
                 }
             }
-
         });
 
         this.physics.add.overlap(this.player, this.cornCart, () => {
-            this.player.stamina += 5;
-            if (this.player.stamina > 10) {
-                this.player.stamina = 10;
+            this.player.stamina += 2.5;
+            if (this.player.stamina > 5) {
+                this.player.stamina = 5;
             }
 
-            this.player.staminaDisplay.setText(this.player.getStaminaForDisplay(this.player.stamina));
+            this.displayStamina();
         });
 
         this.physics.add.overlap(this.visitors, this.waves, (visitor, wave) => {
@@ -141,18 +139,21 @@ export class BeachScene extends Phaser.Scene {
         });
 
         this.cursors = this.input.keyboard.createCursorKeys();
-
         this.scoreDisplay.visible = false;
-        this.player.staminaDisplay.visible = false;
+        this.staminaBar = this.add.sprite(130, 19 + this.cameraScroll, 'stamina-bar', 0).setVisible(false);
+    }
+
+    displayStamina() {
+        this.staminaBar.setTexture('stamina-bar', 5 - Math.floor(this.player.stamina));
     }
 
     displayDeaths() {
         for (let i = 0; i < 5 - this.deaths; i++) {
-            this.add.image(120 + i * 8, 18 + this.cameraScroll , 'visitor-lifebar');
+            this.add.image(80 + i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9);
         }
 
         for (let i = 5 - this.deaths; i < 5; i++) {
-            this.add.image(120 + i * 8, 18 + this.cameraScroll , 'visitor-lifebar').setTint(0x555555);
+            this.add.image(80 + i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9).setTint(0x555555);
         }
     }
 
@@ -167,7 +168,7 @@ export class BeachScene extends Phaser.Scene {
         if (this.runIntro === true) {
             this.scrollCamera();
         }
-    
+
         if (this.cameras.main.scrollY < 130) {
             this.menuScene.moveCloud(this.cloud1, this.cloud1reflection);
             this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
@@ -202,9 +203,11 @@ export class BeachScene extends Phaser.Scene {
                 this.player.setCollideWorldBounds(true);
 
                 this.scoreDisplay.visible = true;
-                this.player.staminaDisplay.visible = true;
                 this.dayTimerDisplay.visible = true;
                 this.displayDeaths();
+
+                this.staminaBar.setVisible(true);
+                this.displayStamina();
             }
         }
     }
@@ -300,21 +303,26 @@ export class BeachScene extends Phaser.Scene {
 
         this.anims.create({
             key: 'wave-start',
-            frames: this.anims.generateFrameNames('wave', {end: 0}),
+            frames: this.anims.generateFrameNames('wave', { end: 0 }),
             frameRate: 0
         });
 
         this.anims.create({
             key: 'wave-end',
-            frames: this.anims.generateFrameNames('wave', {start: 11}),
+            frames: this.anims.generateFrameNames('wave', { start: 11 }),
             frameRate: 0
         })
 
         this.anims.create({
             key: 'wave-moving',
-            frames: this.anims.generateFrameNames('wave', {start: 0, end: 11}),
+            frames: this.anims.generateFrameNames('wave', { start: 0, end: 11 }),
             frameRate: 8,
             repeat: 1
+        });
+
+        this.anims.create({
+            key: 'stamina-bar',
+            frames: this.anims.generateFrameNames('stamina-bar', {start: 0, end: 5})
         });
     }
 
@@ -363,7 +371,7 @@ export class BeachScene extends Phaser.Scene {
         this.cameras.main.fade(3000, 0, 0, 0, true, (camera, progress) => {
             if (1 === progress) {
                 this.audio.stop();
-            
+
                 this.scene.start('BeachScene', {
                     dayNumber: ++this.dayNumber,
                     score: this.score,

@@ -6,19 +6,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         scene.physics.add.existing(this);
         this.body.setSize(5, 5);
         this.playerSpeed = 2;
-        this.stamina = 10;
+        this.stamina = 5;
         this.animationKey = 'walk';
-        this.staminaDisplay = scene.add.text(45, 10 + scene.cameraScroll, this.getStaminaForDisplay(this.stamina), { fontSize: '10px' });
-
         this.createEmitters(scene);
 
         scene.time.addEvent({
             delay: 1000,
             callback: () => {
                 if (this.keys.shift.isDown && this.stamina > 0) {
-                    this.setStamina(this.stamina - 1);
-                } else if (!this.keys.shift.isDown && this.stamina < 10) {
-                    this.setStamina(this.stamina + .5);
+                    this.setStamina(this.stamina - .5);
+                } else if (!this.keys.shift.isDown && this.stamina < 5) {
+                    this.setStamina(this.stamina + .2);
                 }
             },
             repeat: -1
@@ -81,12 +79,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.sandEmitter.startFollow(this);
     }
 
-    getStaminaForDisplay(stamina) {
-        return '.'.repeat(stamina);
-    }
-
     setStamina(current) {
+        if (current < 0) {
+            current = 0;
+        } else if (current > 5) {
+            current = 5;
+        }
+
         this.stamina = current;
-        this.staminaDisplay.setText(this.getStaminaForDisplay(this.stamina));
+        this.scene.displayStamina();
     }
 }
