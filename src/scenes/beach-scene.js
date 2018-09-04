@@ -51,7 +51,6 @@ export class BeachScene extends Phaser.Scene {
         this.dayTimerDisplay = this.add.bitmapText(300, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 18);
         this.dayTimerDisplay.visible = false;
 
-        this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
 
         this.gameOverDisplay = this.add.bitmapText(100, 100 + this.cameraScroll, 'gameFont', 'GAME OVER', 24);
         this.gameOverDisplay.visible = false;
@@ -78,8 +77,6 @@ export class BeachScene extends Phaser.Scene {
                     }
 
                     if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
-                        console.log('day ends');
-
                         clockTimer.destroy();
                         this.nextLevel();
                     }
@@ -146,8 +143,17 @@ export class BeachScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.scoreDisplay.visible = false;
-        this.deathsDisplay.visible = false;
         this.player.staminaDisplay.visible = false;
+    }
+
+    displayDeaths() {
+        for (let i = 0; i < 5 - this.deaths; i++) {
+            this.add.image(120 + i * 8, 18 + this.cameraScroll , 'visitor-lifebar');
+        }
+
+        for (let i = 5 - this.deaths; i < 5; i++) {
+            this.add.image(120 + i * 8, 18 + this.cameraScroll , 'visitor-lifebar').setTint(0x555555);
+        }
     }
 
     update(time, delta) {
@@ -196,9 +202,9 @@ export class BeachScene extends Phaser.Scene {
                 this.player.setCollideWorldBounds(true);
 
                 this.scoreDisplay.visible = true;
-                this.deathsDisplay.visible = true;
                 this.player.staminaDisplay.visible = true;
                 this.dayTimerDisplay.visible = true;
+                this.displayDeaths();
             }
         }
     }
