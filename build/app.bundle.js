@@ -74,14 +74,12 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             this.add.existing(this.player);
 
             this.score = data.score ? data.score : 0;
-            this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 18);
+            this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 16);
 
             this.dayTimer = 3600 * 8;
 
-            this.dayTimerDisplay = this.add.bitmapText(300, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 18);
+            this.dayTimerDisplay = this.add.bitmapText(310, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 16);
             this.dayTimerDisplay.visible = false;
-
-            this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
 
             this.gameOverDisplay = this.add.bitmapText(100, 100 + this.cameraScroll, 'gameFont', 'GAME OVER', 24);
             this.gameOverDisplay.visible = false;
@@ -98,7 +96,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                         if (DEBUG) {
                             _this2.dayTimer += 1800;
                         } else {
-                            _this2.dayTimer += 300;
+                            _this2.dayTimer += 900;
                         }
 
                         _this2.dayTimerDisplay.setText(_this2.getTimerDisplay(_this2.dayTimer));
@@ -108,8 +106,6 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                         }
 
                         if (Math.floor(_this2.dayTimer / 3600) === _this2.dayEndsAt) {
-                            console.log('day ends');
-
                             clockTimer.destroy();
                             _this2.nextLevel();
                         }
@@ -158,12 +154,12 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             });
 
             this.physics.add.overlap(this.player, this.cornCart, function () {
-                _this2.player.stamina += 5;
-                if (_this2.player.stamina > 10) {
-                    _this2.player.stamina = 10;
+                _this2.player.stamina += 2.5;
+                if (_this2.player.stamina > 5) {
+                    _this2.player.stamina = 5;
                 }
 
-                _this2.player.staminaDisplay.setText(_this2.player.getStaminaForDisplay(_this2.player.stamina));
+                _this2.displayStamina();
             });
 
             this.physics.add.overlap(this.visitors, this.waves, function (visitor, wave) {
@@ -173,10 +169,24 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             });
 
             this.cursors = this.input.keyboard.createCursorKeys();
-
             this.scoreDisplay.visible = false;
-            this.deathsDisplay.visible = false;
-            this.player.staminaDisplay.visible = false;
+            this.staminaBar = this.add.sprite(130, 19 + this.cameraScroll, 'stamina-bar', 0).setVisible(false);
+        }
+    }, {
+        key: 'displayStamina',
+        value: function displayStamina() {
+            this.staminaBar.setTexture('stamina-bar', 5 - Math.floor(this.player.stamina));
+        }
+    }, {
+        key: 'displayDeaths',
+        value: function displayDeaths() {
+            for (var i = 0; i < 5 - this.deaths; i++) {
+                this.add.image(80 + i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9);
+            }
+
+            for (var _i = 5 - this.deaths; _i < 5; _i++) {
+                this.add.image(80 + _i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9).setTint(0x555555);
+            }
         }
     }, {
         key: 'update',
@@ -204,7 +214,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
     }, {
         key: 'generateWaves',
         value: function generateWaves() {
-            for (var i = 0; i < 10; i++) {
+            for (var i = 0; i < 15; i++) {
                 var wave = new _wave.Wave(this, 0, 0 + this.cameraScroll, 'wave');
                 this.waves.add(wave);
             }
@@ -228,9 +238,11 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                     this.player.setCollideWorldBounds(true);
 
                     this.scoreDisplay.visible = true;
-                    this.deathsDisplay.visible = true;
-                    this.player.staminaDisplay.visible = true;
                     this.dayTimerDisplay.visible = true;
+                    this.displayDeaths();
+
+                    this.staminaBar.setVisible(true);
+                    this.displayStamina();
                 }
             }
         }
@@ -348,6 +360,11 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 frames: this.anims.generateFrameNames('wave', { start: 0, end: 11 }),
                 frameRate: 8,
                 repeat: 1
+            });
+
+            this.anims.create({
+                key: 'stamina-bar',
+                frames: this.anims.generateFrameNames('stamina-bar', { start: 0, end: 5 })
             });
         }
     }, {
@@ -470,7 +487,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -482,109 +499,109 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Player = exports.Player = function (_Phaser$Physics$Arcad) {
-    _inherits(Player, _Phaser$Physics$Arcad);
+  _inherits(Player, _Phaser$Physics$Arcad);
 
-    function Player(scene, x, y, texture) {
-        _classCallCheck(this, Player);
+  function Player(scene, x, y, texture) {
+    _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, scene, x, y, texture));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, scene, x, y, texture));
 
-        _this.cameraScroll = scene.cameraScroll;
-        scene.physics.add.existing(_this);
-        _this.body.setSize(5, 5);
-        _this.playerSpeed = 2;
-        _this.stamina = 10;
-        _this.animationKey = 'walk';
-        _this.staminaDisplay = scene.add.text(45, 10 + scene.cameraScroll, _this.getStaminaForDisplay(_this.stamina), { fontSize: '10px' });
+    _this.cameraScroll = scene.cameraScroll;
+    scene.physics.add.existing(_this);
+    _this.body.setSize(5, 5);
+    _this.playerSpeed = 2;
+    _this.stamina = 5;
+    _this.animationKey = "walk";
+    _this.createEmitters(scene);
 
-        _this.createEmitters(scene);
+    scene.time.addEvent({
+      delay: 1000,
+      callback: function callback() {
+        if (_this.keys.shift.isDown && _this.stamina > 0) {
+          _this.setStamina(_this.stamina - 0.5);
+        } else if (!_this.keys.shift.isDown && _this.stamina < 5) {
+          _this.setStamina(_this.stamina + 0.2);
+        }
+      },
+      repeat: -1
+    });
+    return _this;
+  }
 
-        scene.time.addEvent({
-            delay: 1000,
-            callback: function callback() {
-                if (_this.keys.shift.isDown && _this.stamina > 0) {
-                    _this.setStamina(_this.stamina - 1);
-                } else if (!_this.keys.shift.isDown && _this.stamina < 10) {
-                    _this.setStamina(_this.stamina + .5);
-                }
-            },
-            repeat: -1
-        });
-        return _this;
+  _createClass(Player, [{
+    key: "update",
+    value: function update(keys, time, delta) {
+      this.keys = keys;
+
+      if (this.y < 195 + this.cameraScroll) {
+        this.animationKey = "swim";
+      } else {
+        this.animationKey = "walk";
+      }
+
+      if (keys.left.isDown) {
+        this.x -= this.playerSpeed;
+        this.flipX = true;
+        this.anims.play(this.animationKey, true);
+      } else if (keys.right.isDown) {
+        this.x += this.playerSpeed;
+        this.flipX = false;
+        this.anims.play(this.animationKey, true);
+      }
+
+      if (keys.up.isDown) {
+        this.y -= this.playerSpeed;
+        this.anims.play(this.animationKey, true);
+      } else if (keys.down.isDown) {
+        this.y += this.playerSpeed;
+        this.anims.play(this.animationKey, true);
+      }
+
+      if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
+        if (this.animationKey === "walk") {
+          this.anims.play("player-idle", true);
+          this.sandEmitter.stop();
+        }
+      }
+
+      if (keys.shift.isDown && this.stamina > 0) {
+        this.playerSpeed = 2.5 * (delta * 30 / 1000);
+
+        if (this.animationKey === "walk") {
+          this.sandEmitter.emitParticle();
+        }
+      } else {
+        this.playerSpeed = 2 * (delta * 30 / 1000);
+      }
     }
+  }, {
+    key: "createEmitters",
+    value: function createEmitters(scene) {
+      this.sandEmitter = scene.add.particles("sand").createEmitter({
+        speed: 10,
+        maxParticles: 70,
+        y: 6,
+        x: -1,
+        lifespan: 300
+      });
 
-    _createClass(Player, [{
-        key: 'update',
-        value: function update(keys, time, delta) {
-            this.keys = keys;
+      this.sandEmitter.startFollow(this);
+    }
+  }, {
+    key: "setStamina",
+    value: function setStamina(current) {
+      if (current < 0) {
+        current = 0;
+      } else if (current > 5) {
+        current = 5;
+      }
 
-            if (this.y < 195 + this.cameraScroll) {
-                this.animationKey = 'swim';
-            } else {
-                this.animationKey = 'walk';
-            }
+      this.stamina = current;
+      this.scene.displayStamina();
+    }
+  }]);
 
-            if (keys.left.isDown) {
-                this.x -= this.playerSpeed;
-                this.flipX = true;
-                this.anims.play(this.animationKey, true);
-            } else if (keys.right.isDown) {
-                this.x += this.playerSpeed;
-                this.flipX = false;
-                this.anims.play(this.animationKey, true);
-            }
-
-            if (keys.up.isDown) {
-                this.y -= this.playerSpeed;
-                this.anims.play(this.animationKey, true);
-            } else if (keys.down.isDown) {
-                this.y += this.playerSpeed;
-                this.anims.play(this.animationKey, true);
-            }
-
-            if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
-                if (this.animationKey === 'walk') {
-                    this.anims.play('player-idle', true);
-                    this.sandEmitter.stop();
-                }
-            }
-
-            if (keys.shift.isDown && this.stamina > 0) {
-                this.playerSpeed = 2.5 * (delta * 30 / 1000);
-
-                if (this.animationKey === 'walk') {
-                    this.sandEmitter.emitParticle();
-                }
-            } else {
-                this.playerSpeed = 2 * (delta * 30 / 1000);
-            }
-        }
-    }, {
-        key: 'createEmitters',
-        value: function createEmitters(scene) {
-            this.sandEmitter = scene.add.particles('sand').createEmitter({
-                speed: 10,
-                maxParticles: 70,
-                y: 6, x: -1,
-                lifespan: 300
-            });
-
-            this.sandEmitter.startFollow(this);
-        }
-    }, {
-        key: 'getStaminaForDisplay',
-        value: function getStaminaForDisplay(stamina) {
-            return '.'.repeat(stamina);
-        }
-    }, {
-        key: 'setStamina',
-        value: function setStamina(current) {
-            this.stamina = current;
-            this.staminaDisplay.setText(this.getStaminaForDisplay(this.stamina));
-        }
-    }]);
-
-    return Player;
+  return Player;
 }(Phaser.Physics.Arcade.Sprite);
 
 /***/ }),
@@ -654,7 +671,7 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                         scene.deaths = scene.maxDeaths;
                     }
 
-                    scene.deathsDisplay.setText(scene.deaths);
+                    scene.displayDeaths();
                 }
             },
             repeat: -1
@@ -1001,6 +1018,7 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
             this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
             this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
             this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32 });
+            this.load.spritesheet('stamina-bar', 'assets/stamina-bar.png', { frameHeight: 16, frameWidth: 16 });
 
             this.load.image('donut', 'assets/donut.png');
             this.load.image('blanket', 'assets/blanket-green.png');
@@ -1014,6 +1032,7 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
 
             this.load.image('cloud-1', 'assets/cloud-1.png');
             this.load.image('cloud-2', 'assets/cloud-2.png');
+            this.load.image('visitor-lifebar', 'assets/visitor-lifebar.png');
 
             this.load.bitmapFont('gameFont', 'assets/fonts/atari-classic.png', 'assets/fonts/atari-classic.xml');
         }
