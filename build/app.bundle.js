@@ -17,6 +17,8 @@ var _player = __webpack_require__(1076);
 
 var _smartVisitor = __webpack_require__(1077);
 
+var _wave = __webpack_require__(1078);
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -41,9 +43,9 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
             this.runIntro = false;
 
-            var audio = this.sound.add('waves');
-            if (!audio.isPlaying) {
-                audio.play({ loop: true });
+            this.audio = this.sound.add('waves');
+            if (!this.audio.isPlaying) {
+                this.audio.play({ loop: true });
             }
 
             this.whistleSound = this.sound.add('whistle');
@@ -65,26 +67,24 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             this.generateVisitors(6 + this.dayNumber + Phaser.Math.Between(0, this.dayNumber));
 
             this.waves = this.physics.add.group();
-            // this.wave = this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave');
+            this.generateWaves();
 
             // player
             this.player = new _player.Player(this, 300, 250 + this.cameraScroll, 'player');
             this.add.existing(this.player);
 
             this.score = data.score ? data.score : 0;
-            this.scoreDisplay = this.add.text(10, 10 + this.cameraScroll, this.score, { fontSize: '18px' });
+            this.scoreDisplay = this.add.bitmapText(10, 10 + this.cameraScroll, 'gameFont', this.score, 16);
 
             this.dayTimer = 3600 * 8;
 
-            this.dayTimerDisplay = this.add.text(340, 10 + this.cameraScroll, this.getTimerDisplay(this.dayTimer), { fontSize: '18px' });
+            this.dayTimerDisplay = this.add.bitmapText(310, 10 + this.cameraScroll, 'gameFont', this.getTimerDisplay(this.dayTimer), 16);
             this.dayTimerDisplay.visible = false;
 
-            this.deathsDisplay = this.add.text(120, 10 + this.cameraScroll, this.deaths, { fontSize: '18px' });
-
-            this.gameOverDisplay = this.add.text(140, 100 + this.cameraScroll, 'GAME OVER', { fontSize: '24px' });
+            this.gameOverDisplay = this.add.bitmapText(100, 100 + this.cameraScroll, 'gameFont', 'GAME OVER', 24);
             this.gameOverDisplay.visible = false;
 
-            this.introTextDisplay = this.add.text(170, 100, 'Day ' + this.dayNumber, { fontSize: '24px' });
+            this.introTextDisplay = this.add.bitmapText(145, 100, 'gameFont', 'Day ' + this.dayNumber, 24);
             this.introTextDisplay.alpha = 0;
 
             this.startDay();
@@ -96,29 +96,24 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                         if (DEBUG) {
                             _this2.dayTimer += 1800;
                         } else {
-                            _this2.dayTimer += 300;
+                            _this2.dayTimer += 900;
                         }
 
                         _this2.dayTimerDisplay.setText(_this2.getTimerDisplay(_this2.dayTimer));
 
-                        // this.dayEndsAt = 9;
                         if (DEBUG) {
                             _this2.dayEndsAt = 9;
                         }
 
                         if (Math.floor(_this2.dayTimer / 3600) === _this2.dayEndsAt) {
-                            console.log('day ends');
-
                             clockTimer.destroy();
                             _this2.nextLevel();
                         }
 
                         // waves
                         if (_this2.percentage(100)) {
-
-                            // this.waves.add(this.physics.add.sprite(200, 100 + this.cameraScroll, 'wave'));
-                            // this.waves.get()
-
+                            var wave = _this2.waves.get();
+                            wave.start();
                         }
                     }
                 },
@@ -159,29 +154,46 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
             });
 
             this.physics.add.overlap(this.player, this.cornCart, function () {
-                _this2.player.stamina += 5;
-                if (_this2.player.stamina > 10) {
-                    _this2.player.stamina = 10;
+                _this2.player.stamina += 2.5;
+                if (_this2.player.stamina > 5) {
+                    _this2.player.stamina = 5;
                 }
 
-                _this2.player.staminaDisplay.setText(_this2.player.getStaminaForDisplay(_this2.player.stamina));
+                _this2.displayStamina();
             });
 
             this.physics.add.overlap(this.visitors, this.waves, function (visitor, wave) {
-                console.log('wave overlap', visitor, wave);
+                if (wave.drowny && (visitor.state === 'swimming' || visitor.state === 'go-swimming')) {
+                    visitor.state = 'drowning';
+                }
             });
 
             this.cursors = this.input.keyboard.createCursorKeys();
-
             this.scoreDisplay.visible = false;
-            this.deathsDisplay.visible = false;
-            this.player.staminaDisplay.visible = false;
+            this.staminaBar = this.add.sprite(130, 19 + this.cameraScroll, 'stamina-bar', 0).setVisible(false);
+        }
+    }, {
+        key: 'displayStamina',
+        value: function displayStamina() {
+            this.staminaBar.setTexture('stamina-bar', 5 - Math.floor(this.player.stamina));
+        }
+    }, {
+        key: 'displayDeaths',
+        value: function displayDeaths() {
+            for (var i = 0; i < 5 - this.deaths; i++) {
+                this.add.image(80 + i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9);
+            }
+
+            for (var _i = 5 - this.deaths; _i < 5; _i++) {
+                this.add.image(80 + _i * 8, 17 + this.cameraScroll, 'visitor-lifebar').setScale(.9).setTint(0x555555);
+            }
         }
     }, {
         key: 'update',
         value: function update(time, delta) {
             this.player.update(this.cursors, time, delta);
             this.visitors.runChildUpdate = true;
+            this.waves.runChildUpdate = true;
 
             this.sendCornCart();
             this.gameOver();
@@ -195,15 +207,18 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 this.menuScene.moveCloud(this.cloud2, this.cloud2reflection);
             }
 
-            this.moveWaves();
-
             this.visitors.children.iterate(function (visitor) {
                 visitor.depth = visitor.y;
             });
         }
     }, {
-        key: 'moveWaves',
-        value: function moveWaves() {}
+        key: 'generateWaves',
+        value: function generateWaves() {
+            for (var i = 0; i < 15; i++) {
+                var wave = new _wave.Wave(this, 0, 0 + this.cameraScroll, 'wave');
+                this.waves.add(wave);
+            }
+        }
     }, {
         key: 'scrollCamera',
         value: function scrollCamera() {
@@ -223,9 +238,11 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                     this.player.setCollideWorldBounds(true);
 
                     this.scoreDisplay.visible = true;
-                    this.deathsDisplay.visible = true;
-                    this.player.staminaDisplay.visible = true;
                     this.dayTimerDisplay.visible = true;
+                    this.displayDeaths();
+
+                    this.staminaBar.setVisible(true);
+                    this.displayStamina();
                 }
             }
         }
@@ -342,7 +359,12 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 key: 'wave-moving',
                 frames: this.anims.generateFrameNames('wave', { start: 0, end: 11 }),
                 frameRate: 8,
-                repeat: -1
+                repeat: 1
+            });
+
+            this.anims.create({
+                key: 'stamina-bar',
+                frames: this.anims.generateFrameNames('stamina-bar', { start: 0, end: 5 })
             });
         }
     }, {
@@ -395,6 +417,8 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
             this.cameras.main.fade(3000, 0, 0, 0, true, function (camera, progress) {
                 if (1 === progress) {
+                    _this4.audio.stop();
+
                     _this4.scene.start('BeachScene', {
                         dayNumber: ++_this4.dayNumber,
                         score: _this4.score,
@@ -463,7 +487,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -475,111 +499,109 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Player = exports.Player = function (_Phaser$Physics$Arcad) {
-    _inherits(Player, _Phaser$Physics$Arcad);
+  _inherits(Player, _Phaser$Physics$Arcad);
 
-    function Player(scene, x, y, texture) {
-        _classCallCheck(this, Player);
+  function Player(scene, x, y, texture) {
+    _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, scene, x, y, texture));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, scene, x, y, texture));
 
-        _this.cameraScroll = scene.cameraScroll;
-        scene.physics.add.existing(_this);
-        _this.body.setSize(5, 5);
-        _this.playerSpeed = 2;
-        _this.stamina = 10;
-        _this.animationKey = 'walk';
-        _this.staminaDisplay = scene.add.text(45, 10 + scene.cameraScroll, _this.getStaminaForDisplay(_this.stamina), { fontSize: '10px' });
+    _this.cameraScroll = scene.cameraScroll;
+    scene.physics.add.existing(_this);
+    _this.body.setSize(5, 5);
+    _this.playerSpeed = 2;
+    _this.stamina = 5;
+    _this.animationKey = "walk";
+    _this.createEmitters(scene);
 
-        _this.createEmitters(scene);
+    scene.time.addEvent({
+      delay: 1000,
+      callback: function callback() {
+        if (_this.keys.shift.isDown && _this.stamina > 0) {
+          _this.setStamina(_this.stamina - 0.5);
+        } else if (!_this.keys.shift.isDown && _this.stamina < 5) {
+          _this.setStamina(_this.stamina + 0.2);
+        }
+      },
+      repeat: -1
+    });
+    return _this;
+  }
 
-        scene.time.addEvent({
-            delay: 1000,
-            callback: function callback() {
-                if (_this.keys.shift.isDown && _this.stamina > 0) {
-                    _this.setStamina(_this.stamina - 1);
-                } else if (!_this.keys.shift.isDown && _this.stamina < 10) {
-                    _this.setStamina(_this.stamina + .5);
-                }
-            },
-            repeat: -1
-        });
-        return _this;
+  _createClass(Player, [{
+    key: "update",
+    value: function update(keys, time, delta) {
+      this.keys = keys;
+
+      if (this.y < 195 + this.cameraScroll) {
+        this.animationKey = "swim";
+      } else {
+        this.animationKey = "walk";
+      }
+
+      if (keys.left.isDown) {
+        this.x -= this.playerSpeed;
+        this.flipX = true;
+        this.anims.play(this.animationKey, true);
+      } else if (keys.right.isDown) {
+        this.x += this.playerSpeed;
+        this.flipX = false;
+        this.anims.play(this.animationKey, true);
+      }
+
+      if (keys.up.isDown) {
+        this.y -= this.playerSpeed;
+        this.anims.play(this.animationKey, true);
+      } else if (keys.down.isDown) {
+        this.y += this.playerSpeed;
+        this.anims.play(this.animationKey, true);
+      }
+
+      if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
+        if (this.animationKey === "walk") {
+          this.anims.play("player-idle", true);
+          this.sandEmitter.stop();
+        }
+      }
+
+      if (keys.shift.isDown && this.stamina > 0) {
+        this.playerSpeed = 2.5 * (delta * 30 / 1000);
+
+        if (this.animationKey === "walk") {
+          this.sandEmitter.emitParticle();
+        }
+      } else {
+        this.playerSpeed = 2 * (delta * 30 / 1000);
+      }
     }
+  }, {
+    key: "createEmitters",
+    value: function createEmitters(scene) {
+      this.sandEmitter = scene.add.particles("sand").createEmitter({
+        speed: 10,
+        maxParticles: 70,
+        y: 6,
+        x: -1,
+        lifespan: 300
+      });
 
-    _createClass(Player, [{
-        key: 'update',
-        value: function update(keys, time, delta) {
-            this.keys = keys;
+      this.sandEmitter.startFollow(this);
+    }
+  }, {
+    key: "setStamina",
+    value: function setStamina(current) {
+      if (current < 0) {
+        current = 0;
+      } else if (current > 5) {
+        current = 5;
+      }
 
-            // @todo would it make more sense to introduce states, like 'in-water', 'on-land'?
+      this.stamina = current;
+      this.scene.displayStamina();
+    }
+  }]);
 
-            if (this.y < 195 + this.cameraScroll) {
-                this.animationKey = 'swim';
-            } else {
-                this.animationKey = 'walk';
-            }
-
-            if (keys.left.isDown) {
-                this.x -= this.playerSpeed;
-                this.flipX = true;
-                this.anims.play(this.animationKey, true);
-            } else if (keys.right.isDown) {
-                this.x += this.playerSpeed;
-                this.flipX = false;
-                this.anims.play(this.animationKey, true);
-            }
-
-            if (keys.up.isDown) {
-                this.y -= this.playerSpeed;
-                this.anims.play(this.animationKey, true);
-            } else if (keys.down.isDown) {
-                this.y += this.playerSpeed;
-                this.anims.play(this.animationKey, true);
-            }
-
-            if (!keys.left.isDown && !keys.right.isDown && !keys.up.isDown && !keys.down.isDown) {
-                if (this.animationKey === 'walk') {
-                    this.anims.play('player-idle', true);
-                    this.sandEmitter.stop();
-                }
-            }
-
-            if (keys.shift.isDown && this.stamina > 0) {
-                this.playerSpeed = 2.5 * (delta * 30 / 1000);
-
-                if (this.animationKey === 'walk') {
-                    this.sandEmitter.emitParticle();
-                }
-            } else {
-                this.playerSpeed = 2 * (delta * 30 / 1000);
-            }
-        }
-    }, {
-        key: 'createEmitters',
-        value: function createEmitters(scene) {
-            this.sandEmitter = scene.add.particles('sand').createEmitter({
-                speed: 10,
-                maxParticles: 70,
-                y: 6, x: -1,
-                lifespan: 300
-            });
-
-            this.sandEmitter.startFollow(this);
-        }
-    }, {
-        key: 'getStaminaForDisplay',
-        value: function getStaminaForDisplay(stamina) {
-            return '.'.repeat(stamina);
-        }
-    }, {
-        key: 'setStamina',
-        value: function setStamina(current) {
-            this.stamina = current;
-            this.staminaDisplay.setText(this.getStaminaForDisplay(this.stamina));
-        }
-    }]);
-
-    return Player;
+  return Player;
 }(Phaser.Physics.Arcade.Sprite);
 
 /***/ }),
@@ -619,8 +641,8 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
         _this.bounty = _this.saveBounty;
         _this.origin = { x: x, y: y };
         _this.chanceToDrown = 0.003;
-        _this.speed = 1;
-        _this.topSpeed = 1;
+        _this.speed = .8;
+        _this.topSpeed = .8;
         _this.walkSpeed = .7;
 
         _this.canMakeDecisions = false;
@@ -649,7 +671,7 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                         scene.deaths = scene.maxDeaths;
                     }
 
-                    scene.deathsDisplay.setText(scene.deaths);
+                    scene.displayDeaths();
                 }
             },
             repeat: -1
@@ -664,17 +686,12 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                         case 'resting':
                             _this.speed = _this.topSpeed;
 
-                            console.log('case: resting');
                             if (_this.percentage(15)) {
-                                console.log('resting -> go swimming, 15%');
-
                                 _this.state = 'go-swimming';
 
                                 // pick sea location
                                 _this.pickSwimmingLocation();
                             } else if (_this.percentage(10)) {
-                                console.log('resting -> go for a walk, 10%');
-
                                 _this.state = 'walking';
                                 _this.speed = _this.walkSpeed;
 
@@ -684,19 +701,12 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
 
                             break;
                         case 'swimming':
-                            console.log('case: swimming');
                             if (_this.percentage(1)) {
-                                console.log('drowning');
-
                                 _this.state = 'drowning';
                             } else if (_this.percentage(15)) {
-                                console.log('go-swimming');
-
                                 _this.state = 'go-swimming';
                                 _this.pickSwimmingLocation(true);
                             } else if (_this.percentage(50)) {
-                                console.log('go-resting');
-
                                 _this.state = 'go-resting';
                                 _this.returnToBlanket();
                             }
@@ -705,16 +715,10 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                         case 'returning':
                             break;
                         case 'idle':
-                            console.log('case: idle');
-
                             if (_this.percentage(15)) {
-                                console.log('idle -> go walking');
-
                                 _this.state = 'walking';
                                 _this.pickBeachLocation();
                             } else if (_this.percentage(50)) {
-                                console.log('idle -> go resting');
-
                                 _this.state = 'returning';
                                 _this.returnToBlanket();
                             }
@@ -737,9 +741,10 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                 this.healthDisplay.visible = true;
                 this.healthDisplay.x = this.x;
                 this.healthDisplay.y = this.y;
+                this.targetLocation = {};
             }
 
-            if (this.y < 195 + this.cameraScroll) {
+            if (this.y < 190 + this.cameraScroll) {
                 if (this.state === 'drowning') {
                     this.play('visitor-2-drowning-2', true);
                 } else {
@@ -800,25 +805,17 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                 this.goTo(this.targetLocation);
 
                 if ((this.state === 'go-swimming' || this.state === 'walking') && this.arrived(this.targetLocation)) {
-                    console.log('aod if, first');
-
                     this.targetLocation = {};
-                    // this.canMakeDecisions = false;
                     if (this.state === 'go-swimming') {
                         this.state = 'swimming';
                     }
 
                     if (this.state === 'walking') {
-                        console.log('visitor arrived, play idle anim');
-
                         this.state = 'idle';
                     }
                 }
 
                 if (this.state === 'returning' && this.arrived(this.targetLocation)) {
-
-                    console.log('aod if, second');
-
                     if (this.donut) {
                         this.donut.destroy();
                     }
@@ -841,8 +838,6 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
                 }
 
                 if (this.state === 'returning' && this.donut) {
-                    console.log('aod if, third');
-
                     this.donut.y = this.y;
                     this.donut.x = this.x;
 
@@ -853,10 +848,6 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
     }, {
         key: 'arrived',
         value: function arrived(target) {
-            if (isNaN(Math.floor(target.x)) || isNaN(Math.floor(target.y))) {
-                console.log('isNaN', target.x, target.y, Math.floor(target.x), Math.floor(target.y), this);
-            }
-
             var flooredX = Math.floor(this.x);
             var flooredY = Math.floor(this.y);
 
@@ -889,8 +880,6 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
         value: function returnToBlanket() {
             this.state = 'returning';
             this.targetLocation = { x: this.blanket.x, y: this.blanket.y };
-
-            console.log('return to blanket:', this.targetLocation, { x: this.x, y: this.y });
         }
     }, {
         key: 'percentage',
@@ -913,11 +902,92 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Wave = exports.Wave = function (_Phaser$Physics$Arcad) {
+    _inherits(Wave, _Phaser$Physics$Arcad);
+
+    function Wave(scene, x, y, texture) {
+        _classCallCheck(this, Wave);
+
+        console.log('wave created');
+
+        var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, scene, x, y, texture));
+
+        scene.physics.add.existing(_this);
+        scene.add.existing(_this);
+
+        _this.cameraScroll = scene.cameraScroll;
+        _this.destination = null;
+        _this.setVisible(false);
+        _this.setActive(false);
+        // start, move, end
+        _this.state = 'start';
+        _this.drowny = true;
+        return _this;
+    }
+
+    _createClass(Wave, [{
+        key: 'start',
+        value: function start() {
+            console.log('wave start');
+            this.x = Phaser.Math.Between(0, 400);
+            this.y = Phaser.Math.Between(this.cameraScroll - 50, 125 + this.cameraScroll);
+
+            this.setActive(true);
+            this.setVisible(true);
+            this.play('wave-start');
+            this.drowny = true;
+
+            this.destination = { x: this.x, y: this.y + 70 };
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            if (this.destination && Math.floor(this.y) !== this.destination.y) {
+                this.y += .8;
+                this.play('wave-moving', true);
+                this.state = 'moving';
+
+                if (Phaser.Math.Difference(this.y, this.destination.y) < 15) {
+                    this.play('wave-end');
+                    this.drowny = false;
+                }
+            } else if (this.destination && Math.floor(this.y) === this.destination.y) {
+                this.state = 'end';
+                this.setVisible(false);
+                this.setActive(false);
+                this.destination = null;
+            }
+        }
+    }]);
+
+    return Wave;
+}(Phaser.Physics.Arcade.Sprite);
+
+/***/ }),
+
+/***/ 1079:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.MenuScene = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _textButton = __webpack_require__(1079);
+var _textButton = __webpack_require__(1080);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -948,6 +1018,7 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
             this.load.spritesheet('player-idle', 'assets/dude-idle.png', { frameHeight: 16, frameWidth: 16 });
             this.load.spritesheet('corn-cart', 'assets/corn-cart.png', { frameHeight: 16, frameWidth: 16 });
             this.load.spritesheet('wave', 'assets/wave.png', { frameHeight: 32, frameWidth: 32 });
+            this.load.spritesheet('stamina-bar', 'assets/stamina-bar.png', { frameHeight: 16, frameWidth: 16 });
 
             this.load.image('donut', 'assets/donut.png');
             this.load.image('blanket', 'assets/blanket-green.png');
@@ -961,6 +1032,9 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
 
             this.load.image('cloud-1', 'assets/cloud-1.png');
             this.load.image('cloud-2', 'assets/cloud-2.png');
+            this.load.image('visitor-lifebar', 'assets/visitor-lifebar.png');
+
+            this.load.bitmapFont('gameFont', 'assets/fonts/atari-classic.png', 'assets/fonts/atari-classic.xml');
         }
     }, {
         key: 'create',
@@ -973,11 +1047,11 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
             }
 
             this.bg = this.add.image(0, 0, 'bg').setOrigin(0);
-
             this.addClouds();
+            this.add.bitmapText(160, 100, 'gameFont', 'START', 18);
 
-            // button
-            var startButton = new _textButton.TextButton(this, 180, 100, 'START', null, function () {
+            var anyKey = this.add.bitmapText(145, 150, 'gameFont', 'press any key', 10);
+            this.input.keyboard.on('keyup', function () {
                 _this2.scene.start('BeachScene', {
                     cloud1x: _this2.cloud1.x, cloud2x: _this2.cloud2.x,
                     cloud1speed: _this2.cloud1.cloudSpeed,
@@ -985,7 +1059,17 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
                 });
             });
 
-            this.add.existing(startButton);
+            this.time.addEvent({
+                delay: 500,
+                callback: function callback() {
+                    if (anyKey.visible) {
+                        anyKey.setVisible(false);
+                    } else {
+                        anyKey.setVisible(true);
+                    }
+                },
+                repeat: -1
+            });
         }
     }, {
         key: 'update',
@@ -1033,7 +1117,7 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
 
 /***/ }),
 
-/***/ 1079:
+/***/ 1080:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1051,13 +1135,14 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var TextButton = exports.TextButton = function (_Phaser$GameObjects$T) {
-    _inherits(TextButton, _Phaser$GameObjects$T);
+// export class TextButton extends Phaser.GameObjects.Text {
+var TextButton = exports.TextButton = function (_Phaser$GameObjects$B) {
+    _inherits(TextButton, _Phaser$GameObjects$B);
 
-    function TextButton(scene, x, y, text, style, callback) {
+    function TextButton(scene, x, y, font, text, size, callback) {
         _classCallCheck(this, TextButton);
 
-        var _this = _possibleConstructorReturn(this, (TextButton.__proto__ || Object.getPrototypeOf(TextButton)).call(this, scene, x, y, text, style));
+        var _this = _possibleConstructorReturn(this, (TextButton.__proto__ || Object.getPrototypeOf(TextButton)).call(this, scene, x, y, font, text, size));
 
         _this.setInteractive({ useHandCursor: true }).on('pointerover', function () {
             return _this.enterButtonHoverState();
@@ -1080,7 +1165,8 @@ var TextButton = exports.TextButton = function (_Phaser$GameObjects$T) {
     }, {
         key: 'enterButtonHoverState',
         value: function enterButtonHoverState() {
-            this.setStyle({ fill: '#ff0' });
+            // this.setStyle({fill: '#ff0'});
+            this.setStyle({ fill: '#0ff' });
         }
     }, {
         key: 'enterButtonRestState',
@@ -1090,7 +1176,7 @@ var TextButton = exports.TextButton = function (_Phaser$GameObjects$T) {
     }]);
 
     return TextButton;
-}(Phaser.GameObjects.Text);
+}(Phaser.GameObjects.BitmapText);
 
 /***/ }),
 
@@ -1104,7 +1190,7 @@ __webpack_require__(210);
 
 var _beachScene = __webpack_require__(1075);
 
-var _menuScene = __webpack_require__(1078);
+var _menuScene = __webpack_require__(1079);
 
 var config = {
     type: Phaser.AUTO,
