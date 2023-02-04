@@ -632,12 +632,12 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
       this.sandEmitter = scene.add.particles("sand").createEmitter({
         speed: 10,
         maxParticles: 70,
-        y: 6,
-        x: -1,
+        // y: 6,
+        // x: -1,
         lifespan: 300
       });
 
-      this.sandEmitter.startFollow(this);
+      this.sandEmitter.startFollow(this, -1, 6);
     }
   }, {
     key: "setStamina",
@@ -970,8 +970,6 @@ var Wave = exports.Wave = function (_Phaser$Physics$Arcad) {
     function Wave(scene, x, y, texture) {
         _classCallCheck(this, Wave);
 
-        console.log('wave created');
-
         var _this = _possibleConstructorReturn(this, (Wave.__proto__ || Object.getPrototypeOf(Wave)).call(this, scene, x, y, texture));
 
         scene.physics.add.existing(_this);
@@ -990,7 +988,6 @@ var Wave = exports.Wave = function (_Phaser$Physics$Arcad) {
     _createClass(Wave, [{
         key: 'start',
         value: function start() {
-            console.log('wave start');
             this.x = Phaser.Math.Between(0, 400);
             this.y = Phaser.Math.Between(this.cameraScroll - 50, 125 + this.cameraScroll);
 

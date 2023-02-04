@@ -77,12 +77,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.sandEmitter = scene.add.particles("sand").createEmitter({
       speed: 10,
       maxParticles: 70,
-      y: 6,
-      x: -1,
       lifespan: 300,
     })
 
-    this.sandEmitter.startFollow(this)
+    this.sandEmitter.startFollow(this, -1, 6)
   }
 
   setStamina(current) {

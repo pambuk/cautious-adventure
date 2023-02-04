@@ -1,7 +1,5 @@
 export class Wave extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture) {
-        console.log('wave created');
-
         super(scene, x, y, texture);
         scene.physics.add.existing(this);
         scene.add.existing(this);
@@ -16,7 +14,6 @@ export class Wave extends Phaser.Physics.Arcade.Sprite {
     }
 
     start() {
-        console.log('wave start');
         this.x = Phaser.Math.Between(0, 400);
         this.y = Phaser.Math.Between(this.cameraScroll - 50, 125 + this.cameraScroll);
 
