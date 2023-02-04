@@ -13,6 +13,7 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
         this.speed = .8;
         this.topSpeed = .8;
         this.walkSpeed = .7;
+        this.swimSpeed = .5;
 
         this.canMakeDecisions = false;
         this.targetLocation = {};
@@ -71,6 +72,8 @@ export class SmartVisitor extends Phaser.Physics.Arcade.Sprite {
 
                             break;
                         case 'swimming':
+                            this.speed = this.swimSpeed;
+
                             if (this.percentage(1)) {
                                 this.state = 'drowning';
                             } else if (this.percentage(15)) {

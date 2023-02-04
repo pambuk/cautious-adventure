@@ -1,6 +1,38 @@
-webpackJsonp([0],{
+webpackJsonp([0],[
+/* 0 */,
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 1075:
+"use strict";
+
+
+__webpack_require__(0);
+
+var _beachScene = __webpack_require__(2);
+
+var _menuScene = __webpack_require__(6);
+
+var config = {
+    type: Phaser.AUTO,
+    width: 400,
+    height: 300,
+    scene: [_menuScene.MenuScene, _beachScene.BeachScene],
+    zoom: 2,
+    render: {
+        pixelArt: true
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: false
+        }
+    }
+};
+
+new Phaser.Game(config);
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13,11 +45,11 @@ exports.BeachScene = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _player = __webpack_require__(1076);
+var _player = __webpack_require__(3);
 
-var _smartVisitor = __webpack_require__(1077);
+var _smartVisitor = __webpack_require__(4);
 
-var _wave = __webpack_require__(1078);
+var _wave = __webpack_require__(5);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -370,9 +402,18 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
     }, {
         key: 'generateVisitors',
         value: function generateVisitors(count) {
-            for (var i = 0; i < count; i++) {
+            var loops = 0;
+            for (var i = 0; i < count; i++, loops++) {
                 var x = Phaser.Math.Between(20, 380);
                 var y = Phaser.Math.Between(230, 280);
+
+                if (this.checkIfVisitorWasCreatedAtPositionNear(x, y)) {
+                    if (loops <= 20) {
+                        --i;
+                    }
+                    continue;
+                }
+
                 var visitorType = Phaser.Math.Between(1, 2);
                 // let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
                 var visitor = new _smartVisitor.SmartVisitor(this, x, y + 250, 'visitor-' + visitorType + '-resting');
@@ -387,7 +428,19 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
                 this.visitors.add(visitor);
                 this.add.existing(visitor);
+                loops = 0;
             }
+        }
+    }, {
+        key: 'checkIfVisitorWasCreatedAtPositionNear',
+        value: function checkIfVisitorWasCreatedAtPositionNear(x, y) {
+            this.visitors.getChildren().find(function (visitor) {
+                if (true == (visitor.x >= x - 15 && visitor.x <= x + 15 && visitor.y >= y - 10 && visitor.y <= y + 10)) {
+                    return true;
+                }
+            });
+
+            return false;
         }
     }, {
         key: 'getTimerDisplay',
@@ -479,8 +532,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 }(Phaser.Scene);
 
 /***/ }),
-
-/***/ 1076:
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -605,8 +657,7 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
 }(Phaser.Physics.Arcade.Sprite);
 
 /***/ }),
-
-/***/ 1077:
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -644,6 +695,7 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
         _this.speed = .8;
         _this.topSpeed = .8;
         _this.walkSpeed = .7;
+        _this.swimSpeed = .5;
 
         _this.canMakeDecisions = false;
         _this.targetLocation = {};
@@ -701,6 +753,8 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
 
                             break;
                         case 'swimming':
+                            _this.speed = _this.swimSpeed;
+
                             if (_this.percentage(1)) {
                                 _this.state = 'drowning';
                             } else if (_this.percentage(15)) {
@@ -892,8 +946,7 @@ var SmartVisitor = exports.SmartVisitor = function (_Phaser$Physics$Arcad) {
 }(Phaser.Physics.Arcade.Sprite);
 
 /***/ }),
-
-/***/ 1078:
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -973,8 +1026,7 @@ var Wave = exports.Wave = function (_Phaser$Physics$Arcad) {
 }(Phaser.Physics.Arcade.Sprite);
 
 /***/ }),
-
-/***/ 1079:
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -987,7 +1039,7 @@ exports.MenuScene = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _textButton = __webpack_require__(1080);
+var _textButton = __webpack_require__(7);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1116,8 +1168,7 @@ var MenuScene = exports.MenuScene = function (_Phaser$Scene) {
 }(Phaser.Scene);
 
 /***/ }),
-
-/***/ 1080:
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1178,39 +1229,5 @@ var TextButton = exports.TextButton = function (_Phaser$GameObjects$B) {
     return TextButton;
 }(Phaser.GameObjects.BitmapText);
 
-/***/ }),
-
-/***/ 434:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-__webpack_require__(210);
-
-var _beachScene = __webpack_require__(1075);
-
-var _menuScene = __webpack_require__(1079);
-
-var config = {
-    type: Phaser.AUTO,
-    width: 400,
-    height: 300,
-    scene: [_menuScene.MenuScene, _beachScene.BeachScene],
-    zoom: 2,
-    render: {
-        pixelArt: true
-    },
-    physics: {
-        default: 'arcade',
-        arcade: {
-            debug: false
-        }
-    }
-};
-
-new Phaser.Game(config);
-
 /***/ })
-
-},[434]);
+],[1]);

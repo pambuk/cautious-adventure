@@ -327,9 +327,18 @@ export class BeachScene extends Phaser.Scene {
     }
 
     generateVisitors(count) {
-        for (let i = 0; i < count; i++) {
+        let loops = 0;
+        for (let i = 0; i < count; i++, loops++) {
             let x = Phaser.Math.Between(20, 380);
             let y = Phaser.Math.Between(230, 280);
+
+            if (this.checkIfVisitorWasCreatedAtPositionNear(x, y)) {
+                if (loops <= 20) {
+                    --i;
+                }
+                continue;
+            }
+
             let visitorType = Phaser.Math.Between(1, 2);
             // let visitor = new Visitor(this, x, y + 250, `visitor-${visitorType}-resting`);
             let visitor = new SmartVisitor(this, x, y + 250, `visitor-${visitorType}-resting`);
@@ -344,7 +353,18 @@ export class BeachScene extends Phaser.Scene {
 
             this.visitors.add(visitor);
             this.add.existing(visitor);
+            loops = 0;
         }
+    }
+
+    checkIfVisitorWasCreatedAtPositionNear(x, y) {
+        this.visitors.getChildren().find(visitor => {
+            if (true == (visitor.x >= x - 15 && visitor.x <= x + 15 && visitor.y >= y - 10 && visitor.y <= y + 10)) {
+                return true;
+            }
+        });
+
+        return false;
     }
 
     getTimerDisplay(seconds) {
