@@ -121,6 +121,14 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
             this.startDay();
 
+            if (DEBUG) {
+                var addButton = this.add.text(250, 250, 'Add', { fill: '#0f0' });
+                addButton.setInteractive();
+                addButton.on('pointerover', function () {
+                    _this2.generateVisitors(1);
+                });
+            }
+
             var clockTimer = this.time.addEvent({
                 delay: 1000,
                 callback: function callback() {
@@ -137,7 +145,7 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                             _this2.dayEndsAt = 9;
                         }
 
-                        if (Math.floor(_this2.dayTimer / 3600) === _this2.dayEndsAt) {
+                        if (Math.floor(_this2.dayTimer / 3600) === _this2.dayEndsAt && !DEBUG) {
                             clockTimer.destroy();
                             _this2.nextLevel();
                         }
@@ -407,10 +415,11 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
                 var x = Phaser.Math.Between(20, 380);
                 var y = Phaser.Math.Between(230, 280);
 
-                if (this.checkIfVisitorWasCreatedAtPositionNear(x, y)) {
+                if (this.checkIfVisitorWasCreatedAtPositionNear(x, y + 250)) {
                     if (loops <= 20) {
                         --i;
                     }
+
                     continue;
                 }
 
@@ -428,19 +437,24 @@ var BeachScene = exports.BeachScene = function (_Phaser$Scene) {
 
                 this.visitors.add(visitor);
                 this.add.existing(visitor);
+
                 loops = 0;
             }
         }
     }, {
         key: 'checkIfVisitorWasCreatedAtPositionNear',
         value: function checkIfVisitorWasCreatedAtPositionNear(x, y) {
-            this.visitors.getChildren().find(function (visitor) {
+            var result = this.visitors.getChildren().find(function (visitor) {
                 if (true == (visitor.x >= x - 15 && visitor.x <= x + 15 && visitor.y >= y - 10 && visitor.y <= y + 10)) {
                     return true;
                 }
             });
 
-            return false;
+            if (result === undefined) {
+                return false;
+            }
+
+            return true;
         }
     }, {
         key: 'getTimerDisplay',
@@ -632,8 +646,6 @@ var Player = exports.Player = function (_Phaser$Physics$Arcad) {
       this.sandEmitter = scene.add.particles("sand").createEmitter({
         speed: 10,
         maxParticles: 70,
-        // y: 6,
-        // x: -1,
         lifespan: 300
       });
 

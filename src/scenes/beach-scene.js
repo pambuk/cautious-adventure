@@ -59,6 +59,14 @@ export class BeachScene extends Phaser.Scene {
 
         this.startDay();
 
+        if (DEBUG) {
+            const addButton = this.add.text(250, 250, 'Add', { fill: '#0f0' });
+            addButton.setInteractive();   
+            addButton.on('pointerover', () => { 
+                this.generateVisitors(1);
+            });
+        }
+
         let clockTimer = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -75,7 +83,7 @@ export class BeachScene extends Phaser.Scene {
                         this.dayEndsAt = 9;
                     }
 
-                    if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt) {
+                    if (Math.floor(this.dayTimer / 3600) === this.dayEndsAt && !DEBUG) {
                         clockTimer.destroy();
                         this.nextLevel();
                     }
@@ -332,10 +340,11 @@ export class BeachScene extends Phaser.Scene {
             let x = Phaser.Math.Between(20, 380);
             let y = Phaser.Math.Between(230, 280);
 
-            if (this.checkIfVisitorWasCreatedAtPositionNear(x, y)) {
+            if (this.checkIfVisitorWasCreatedAtPositionNear(x, y + 250)) {
                 if (loops <= 20) {
                     --i;
                 }
+
                 continue;
             }
 
@@ -353,18 +362,23 @@ export class BeachScene extends Phaser.Scene {
 
             this.visitors.add(visitor);
             this.add.existing(visitor);
+
             loops = 0;
         }
     }
 
     checkIfVisitorWasCreatedAtPositionNear(x, y) {
-        this.visitors.getChildren().find(visitor => {
+        let result = this.visitors.getChildren().find(visitor => {
             if (true == (visitor.x >= x - 15 && visitor.x <= x + 15 && visitor.y >= y - 10 && visitor.y <= y + 10)) {
                 return true;
             }
         });
 
-        return false;
+        if (result === undefined) {
+            return false;
+        }
+
+        return true;
     }
 
     getTimerDisplay(seconds) {
