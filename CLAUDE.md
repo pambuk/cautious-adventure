@@ -489,7 +489,8 @@ Key debugging points:
 - Timer events
 
 ### Browser DevTools
-- Use React DevTools or similar for inspecting Phaser game state
+- Use browser DevTools console for inspecting Phaser game state and variables
+- Enable Phaser's built-in debug tools (e.g., physics debug mode) for visualizing collisions and game objects
 - Monitor performance in Performance tab
 - Check asset loading in Network tab
 
