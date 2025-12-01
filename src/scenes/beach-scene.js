@@ -184,6 +184,24 @@ export class BeachScene extends Phaser.Scene {
 
         this.visitors.children.iterate((visitor) => {
             visitor.depth = visitor.y;
+
+            // Update visitor visibility based on player's field of view
+            if (this.gameStarted && visitor.active) {
+                const isVisible = this.player.isInFieldOfView(visitor.x, visitor.y);
+                visitor.setVisible(isVisible);
+
+                // Also hide/show the blanket and health display based on FOV
+                if (visitor.blanket) {
+                    visitor.blanket.setVisible(isVisible);
+                }
+                if (visitor.healthDisplay) {
+                    // Only show health display if visitor is visible AND drowning
+                    visitor.healthDisplay.setVisible(isVisible && visitor.state === 'drowning');
+                }
+                if (visitor.donut) {
+                    visitor.donut.setVisible(isVisible);
+                }
+            }
         });
     }
 
