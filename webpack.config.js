@@ -3,14 +3,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: {
-        app: './src/index.js',
-        'production-dependencies': ['phaser']
-    },
+    entry: './src/index.js',
 
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'app.bundle.js'
+        filename: '[name].bundle.js'
     },
 
     module: {
@@ -47,9 +44,20 @@ module.exports = {
             'typeof CANVAS_RENDERER': JSON.stringify(true),
             'typeof WEBGL_RENDERER': JSON.stringify(true)
         }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'production-dependencies',
-            filename: 'production-dependencies.bundle.js'
+        new webpack.ProvidePlugin({
+            process: 'process/browser'
         })
-    ]
+    ],
+
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'production-dependencies',
+                    chunks: 'all'
+                }
+            }
+        }
+    }
 };
